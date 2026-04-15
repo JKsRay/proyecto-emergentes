@@ -24,6 +24,9 @@
 # Recordings can get excessive in size
 /[Rr]ecordings/
 
+#llamalib
+/[Aa]ssets/[Ss]treaming[Aa]ssets/LlamaLib-v2.0.5/
+
 # Uncomment this line if you wish to ignore the asset store tools plugin
 # /[Aa]ssets/AssetStoreTools*
 
@@ -98,3 +101,5 @@ InitTestScene*.unity*
 
 # Auto-generated scenes by play mode tests
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
+Assets/StreamingAssets/LlamaLib-v2.0.5/win-x64/native/llamalib_win-x64_avx2.dll.meta
+Assets/StreamingAssets/LlamaLib-v2.0.5/win-x64/native/llamalib_win-x64_avx2.dll
