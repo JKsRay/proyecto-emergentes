@@ -13,6 +13,11 @@ public class PlaceObjectOnPlane : MonoBehaviour
     [SerializeField]
     private float yRotationOffset = 0f;
 
+    [Tooltip("Distance in meters to keep the object above the detected plane.")]
+    [Min(0f)]
+    [SerializeField]
+    private float hoverHeight = 0.1f;
+
     private ARRaycastManager _raycastManager;
     private readonly List<ARRaycastHit> _hits = new();
     private GameObject _spawnedObject;
@@ -54,16 +59,27 @@ public class PlaceObjectOnPlane : MonoBehaviour
             return;
 
         Pose hitPose = _hits[0].pose;
-        Quaternion targetRotation = GetFacingCameraRotation(hitPose.position, hitPose.rotation);
+        Vector3 targetPosition = GetPlacementPosition(hitPose);
+        Quaternion targetRotation = GetFacingCameraRotation(targetPosition, hitPose.rotation);
 
         // Keep only one object in scene: create once, then move it.
         if (_spawnedObject == null)
         {
-            _spawnedObject = Instantiate(objectPrefab, hitPose.position, targetRotation);
+            _spawnedObject = Instantiate(objectPrefab, targetPosition, targetRotation);
             return;
         }
 
-        _spawnedObject.transform.SetPositionAndRotation(hitPose.position, targetRotation);
+        _spawnedObject.transform.SetPositionAndRotation(targetPosition, targetRotation);
+    }
+
+    private Vector3 GetPlacementPosition(Pose hitPose)
+    {
+        if (hoverHeight <= 0f)
+            return hitPose.position;
+
+        // Offset along plane normal so the object stays above the detected surface.
+        Vector3 planeNormal = hitPose.rotation * Vector3.up;
+        return hitPose.position + (planeNormal.normalized * hoverHeight);
     }
 
     private Quaternion GetFacingCameraRotation(Vector3 objectPosition, Quaternion fallbackRotation)
