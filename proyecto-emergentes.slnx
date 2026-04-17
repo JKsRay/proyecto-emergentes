@@ -5,6 +5,4 @@
   <Project Path="Cloud.Unum.USearch.csproj" />
   <Project Path="Assembly-CSharp-Editor.csproj" />
   <Project Path="undream.llmunity.Editor.Tests.csproj" />
-  <Project Path="Unity.XR.Interaction.Toolkit.Samples.InteractionSimulator.csproj" />
-  <Project Path="Unity.XR.Interaction.Toolkit.Samples.InteractionSimulator.Editor.csproj" />
 </Solution>
