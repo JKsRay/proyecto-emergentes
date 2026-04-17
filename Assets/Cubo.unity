@@ -966,7 +966,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b292d488688d6df4ea1b6e3902f06d37, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlaceObjectOnPlane
-  objectPrefab: {fileID: 6814599356461840995, guid: 50f01326cb2b98647862c3acd38b7bcf, type: 3}
+  objectPrefab: {fileID: 3816680439377690400, guid: 225c410353041e64fa20cd0de74081b0, type: 3}
   yRotationOffset: 0
 --- !u!114 &2080854618
 MonoBehaviour:
