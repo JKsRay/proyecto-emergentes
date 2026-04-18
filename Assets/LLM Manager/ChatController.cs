@@ -20,6 +20,7 @@ public class ChatController : MonoBehaviour
 
     private bool isRequestInFlight;
     private bool loggedCurrentReply;
+    private bool streamingReply;
 
     private void Awake()
     {
@@ -86,6 +87,7 @@ public class ChatController : MonoBehaviour
 
         isRequestInFlight = true;
         loggedCurrentReply = false;
+        streamingReply = false;
         aiResponse.text = "...";
 
         if (sendButton != null)
@@ -123,6 +125,12 @@ public class ChatController : MonoBehaviour
 
     public void HandleReply(string replySoFar)
     {
+        if (!streamingReply)
+        {
+            streamingReply = true;
+            robotStateManager?.ActivarAnimacionHablar(true);
+        }
+
         if (!loggedCurrentReply)
         {
             Debug.Log("Chat: Respuesta recibida del LLM...");
@@ -130,17 +138,17 @@ public class ChatController : MonoBehaviour
         }
 
         aiResponse.text = replySoFar;
-        robotStateManager?.OnLLMReplyProgress(replySoFar);
     }
 
     public void DoneReplying()
     {
         isRequestInFlight = false;
+        streamingReply = false;
         if (sendButton != null)
         {
             sendButton.interactable = true;
         }
 
-        robotStateManager?.OnLLMReplyComplete();
+        robotStateManager?.ActivarAnimacionHablar(false);
     }
 }

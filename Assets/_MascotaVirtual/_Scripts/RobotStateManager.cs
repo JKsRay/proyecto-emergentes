@@ -1,5 +1,4 @@
 using UnityEngine;
-using LLMUnity;
 
 public class RobotStateManager : MonoBehaviour
 {
@@ -9,7 +8,7 @@ public class RobotStateManager : MonoBehaviour
     [Range(0f, 100f)] public float felicidad = 100f;
 
     [Header("Integracion")]
-    [SerializeField] private LLMAgent llmAgent;
+    [SerializeField] private ChatController chatController;
 
     [Header("Desgaste Pasivo")]
     [SerializeField] private float factorDesgaste = 2f;
@@ -17,13 +16,18 @@ public class RobotStateManager : MonoBehaviour
     private const float MinEstado = 0f;
     private const float MaxEstado = 100f;
 
-    private const string TriggerDance = "Dance0";
-    private const string TriggerWin = "Win";
-    private const string TriggerThumb = "Thumb";
     private const string TriggerTalk = "Talk";
 
     private Animator robotAnimator;
-    private bool llmRespondiendo;
+    private bool animacionHablarActiva;
+
+    private void Awake()
+    {
+        if (chatController == null)
+        {
+            chatController = FindObjectOfType<ChatController>();
+        }
+    }
 
     private void Update()
     {
@@ -44,8 +48,8 @@ public class RobotStateManager : MonoBehaviour
         energia = MaxEstado;
         ClampEstados();
 
-        DispararTrigger(TriggerWin);
-        EnviarContextoALLM("El usuario recargo tu bateria. Te sientes listo y agradecido. Responde brevemente sobre esto.");
+        DispararTrigger("Win");
+        EnviarContextoChat("El usuario recargo tu bateria. Te sientes listo y agradecido. Responde brevemente sobre esto.");
 
         Debug.Log($"[RobotStateManager] Bateria recargada. {EstadoActual()}");
     }
@@ -55,8 +59,8 @@ public class RobotStateManager : MonoBehaviour
         mantenimiento = MaxEstado;
         ClampEstados();
 
-        DispararTrigger(TriggerThumb);
-        EnviarContextoALLM("El usuario realizo tu mantenimiento. Te sientes estable y seguro. Responde brevemente sobre esto.");
+        DispararTrigger("Thumb");
+        EnviarContextoChat("El usuario realizo tu mantenimiento. Te sientes estable y seguro. Responde brevemente sobre esto.");
 
         Debug.Log($"[RobotStateManager] Mantenimiento restaurado. {EstadoActual()}");
     }
@@ -66,7 +70,7 @@ public class RobotStateManager : MonoBehaviour
         // Solo permite jugar si hay suficiente energia y mantenimiento.
         if (energia <= 20f || mantenimiento <= 20f)
         {
-            EnviarContextoALLM("El usuario quiso jugar contigo, pero tenias poca energia o mantenimiento. Responde brevemente sobre tu estado.");
+            EnviarContextoChat("El usuario quiso jugar contigo, pero tenias poca energia o mantenimiento. Responde brevemente sobre tu estado.");
             Debug.Log($"[RobotStateManager] No se pudo jugar (energia/mantenimiento insuficiente). {EstadoActual()}");
             return;
         }
@@ -77,8 +81,8 @@ public class RobotStateManager : MonoBehaviour
 
         ClampEstados();
 
-        DispararTrigger(TriggerDance);
-        EnviarContextoALLM("El usuario ha jugado contigo. Estas feliz. Responde brevemente sobre esto.");
+        DispararTrigger("Dance0");
+        EnviarContextoChat("El usuario ha jugado contigo. Estas feliz. Responde brevemente sobre esto.");
 
         Debug.Log($"[RobotStateManager] Robot jugo correctamente. {EstadoActual()}");
     }
@@ -96,32 +100,38 @@ public class RobotStateManager : MonoBehaviour
         Debug.Log($"[RobotStateManager] Animator del robot registrado: {robotAnimator.name}");
     }
 
-    public void OnLLMReplyProgress(string _)
+    public void ActivarAnimacionHablar(bool activar)
     {
-        if (llmRespondiendo)
+        if (robotAnimator == null)
         {
             return;
         }
 
-        llmRespondiendo = true;
-        DispararTrigger(TriggerTalk);
-    }
-
-    public void OnLLMReplyComplete()
-    {
-        llmRespondiendo = false;
-    }
-
-    private void EnviarContextoALLM(string contexto)
-    {
-        if (llmAgent == null)
+        if (activar)
         {
-            Debug.LogWarning("[RobotStateManager] No hay LLMAgent asignado en el Inspector.");
+            if (animacionHablarActiva)
+            {
+                return;
+            }
+
+            animacionHablarActiva = true;
+            DispararTrigger(TriggerTalk);
+        }
+        else
+        {
+            animacionHablarActiva = false;
+        }
+    }
+
+    private void EnviarContextoChat(string contexto)
+    {
+        if (chatController == null)
+        {
+            Debug.LogWarning("[RobotStateManager] No hay ChatController asignado en el Inspector.");
             return;
         }
 
-        llmRespondiendo = false;
-        _ = llmAgent.Chat(contexto, OnLLMReplyProgress, OnLLMReplyComplete);
+        chatController.SendPrompt(contexto);
     }
 
     private void DispararTrigger(string triggerName)
