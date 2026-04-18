@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
 
@@ -53,6 +54,9 @@ public class PlaceObjectOnPlane : MonoBehaviour
 
         Touch touch = Input.GetTouch(0);
         if (touch.phase != TouchPhase.Began)
+            return;
+
+        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject(touch.fingerId))
             return;
 
         if (!_raycastManager.Raycast(touch.position, _hits, TrackableType.PlaneWithinPolygon))
