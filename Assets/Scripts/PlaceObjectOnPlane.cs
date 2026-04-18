@@ -66,6 +66,7 @@ public class PlaceObjectOnPlane : MonoBehaviour
         if (_spawnedObject == null)
         {
             _spawnedObject = Instantiate(objectPrefab, targetPosition, targetRotation);
+            FindObjectOfType<RobotStateManager>()?.RegisterRobot(_spawnedObject.GetComponentInChildren<Animator>());
             return;
         }
 
