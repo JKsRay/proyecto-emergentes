@@ -13,6 +13,14 @@
 /Assets/_Recovery/
 *.log
 
+# Ignorar la librería pesada del compañero
+/[Aa]ssets/StreamingAssets/LlamaLib-v2.0.5/
+/[Aa]ssets/StreamingAssets/LlamaLib-v2.0.5.meta
+
+# Ignorar configuraciones locales de XRI
+/[Aa]ssets/XRI/
+/[Aa]ssets/XRI.meta
+
 # By default unity supports Blender asset imports, *.blend1 blender files do not need to be commited to version control.
 *.blend1
 *.blend1.meta
