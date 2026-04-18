@@ -1575,9 +1575,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RobotUIManager
   stateManager: {fileID: 1991671773235805886}
-  btnRecargar: {fileID: 0}
-  btnMantenimiento: {fileID: 0}
-  btnJugar: {fileID: 0}
+  btnRecargar: {fileID: 3678610115787644390}
+  btnMantenimiento: {fileID: 6234721292859192391}
+  btnJugar: {fileID: 7369401159555377775}
 --- !u!1 &8506264667185418139
 GameObject:
   m_ObjectHideFlags: 0
