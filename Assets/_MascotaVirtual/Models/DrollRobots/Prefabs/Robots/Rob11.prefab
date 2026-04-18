@@ -62,10 +62,10 @@ Rigidbody:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 7905381062091933305}
-  serializedVersion: 4
+  serializedVersion: 5
   m_Mass: 1
-  m_Drag: 0
-  m_AngularDrag: 0.05
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -105,15 +105,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: -8679921383154817045, guid: 10fc09ce5d97e5e438937a2f9e74eeda, type: 3}
       propertyPath: m_LocalScale.x
-      value: 1
+      value: 0.8
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 10fc09ce5d97e5e438937a2f9e74eeda, type: 3}
       propertyPath: m_LocalScale.y
-      value: 1
+      value: 0.8
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 10fc09ce5d97e5e438937a2f9e74eeda, type: 3}
       propertyPath: m_LocalScale.z
-      value: 1
+      value: 0.8
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 10fc09ce5d97e5e438937a2f9e74eeda, type: 3}
       propertyPath: m_LocalPosition.x
@@ -121,7 +121,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 10fc09ce5d97e5e438937a2f9e74eeda, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 0.219
       objectReference: {fileID: 0}
     - target: {fileID: -8679921383154817045, guid: 10fc09ce5d97e5e438937a2f9e74eeda, type: 3}
       propertyPath: m_LocalPosition.z
@@ -196,9 +196,6 @@ PrefabInstance:
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 10fc09ce5d97e5e438937a2f9e74eeda, type: 3}
       insertIndex: -1
-      addedObject: {fileID: 8355648303213367723}
-    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 10fc09ce5d97e5e438937a2f9e74eeda, type: 3}
-      insertIndex: -1
       addedObject: {fileID: 5171542128525163071}
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 10fc09ce5d97e5e438937a2f9e74eeda, type: 3}
       insertIndex: -1
@@ -228,32 +225,6 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 919132149155446097, guid: 10fc09ce5d97e5e438937a2f9e74eeda, type: 3}
   m_PrefabInstance: {fileID: 4050701384969142897}
   m_PrefabAsset: {fileID: 0}
---- !u!143 &8355648303213367723
-CharacterController:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3816680439377690400}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 0
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Height: 0.31
-  m_Radius: 0.14
-  m_SlopeLimit: 45
-  m_StepOffset: 0.3
-  m_SkinWidth: 0.08
-  m_MinMoveDistance: 0.001
-  m_Center: {x: 0, y: 0, z: 0}
 --- !u!114 &5171542128525163071
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -306,7 +277,7 @@ MonoBehaviour:
   mouthSpeechRenderer: {fileID: 2994789091263299982}
   isRainbowCycles: 0
   isBattle: 0
-  "\u0441olorIndex": 0
+  "\xF1olorIndex": 0
   eyesColorIndex: 1
   mouthColorIndex: 2
   emissionIntensity: 1.53
@@ -339,7 +310,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 758a072f357789a4785ef6561c86c40e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  controller: {fileID: 8355648303213367723}
+  controller: {fileID: 0}
   liftSpeed: 0.6
   maxHeight: 3
   minHeight: 0

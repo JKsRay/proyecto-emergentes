@@ -3,14 +3,18 @@
 # Get latest from https://github.com/github/gitignore/blob/main/Unity.gitignore
 #
 .utmp/
-/[Ll]ibrary/
-/[Tt]emp/
-/[Oo]bj/
-/[Bb]uild/
-/[Bb]uilds/
-/[Ll]ogs/
-/[Uu]ser[Ss]ettings/
-/Assets/_Recovery/
+[Ll]ibrary/
+[Tt]emp/
+[Oo]bj/
+[Bb]uild/
+[Bb]uilds/
+[Ll]ogs/
+Assets/Samples/
+[Uu]ser[Ss]ettings/
+Assets/_Recovery/
+/Assets/UnityXRContent/ARFoundation/SimulationEnvironments/
+/Assets/XRI
+
 *.log
 
 # Ignorar la librería pesada del compañero
@@ -31,6 +35,9 @@
 
 # Recordings can get excessive in size
 /[Rr]ecordings/
+
+#llamalib
+/[Aa]ssets/[Ss]treaming[Aa]ssets/LlamaLib-v2.0.5/
 
 # Uncomment this line if you wish to ignore the asset store tools plugin
 # /[Aa]ssets/AssetStoreTools*
@@ -106,3 +113,5 @@ InitTestScene*.unity*
 
 # Auto-generated scenes by play mode tests
 /[Aa]ssets/[Ii]nit[Tt]est[Ss]cene*.unity*
+Assets/StreamingAssets/LlamaLib-v2.0.5/win-x64/native/llamalib_win-x64_avx2.dll.meta
+Assets/StreamingAssets/LlamaLib-v2.0.5/win-x64/native/llamalib_win-x64_avx2.dll
