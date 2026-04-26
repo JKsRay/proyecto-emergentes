@@ -1561,6 +1561,7 @@ MonoBehaviour:
   energia: 100
   mantenimiento: 100
   felicidad: 100
+  chatController: {fileID: 4042639727929151635, guid: 0a8e1e2e62662fb4687ee65a6b6ff459, type: 3}
   factorDesgaste: 2
 --- !u!114 &-81288034357649335
 MonoBehaviour:

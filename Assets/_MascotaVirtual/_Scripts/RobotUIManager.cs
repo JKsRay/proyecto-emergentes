@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Events;
 
 public class RobotUIManager : MonoBehaviour
 {
@@ -13,35 +14,43 @@ public class RobotUIManager : MonoBehaviour
     {
         if (stateManager == null)
         {
-            Debug.LogError("[RobotUIManager] Falta asignar 'stateManager' en el Inspector.");
             return;
         }
 
-        if (btnRecargar != null)
+        ConectarBoton(btnRecargar, stateManager.BotonRecargarBateria);
+        ConectarBoton(btnMantenimiento, stateManager.BotonMantenimiento);
+        ConectarBoton(btnJugar, stateManager.BotonJugar);
+    }
+
+    private void OnDestroy()
+    {
+        if (stateManager == null)
         {
-            btnRecargar.onClick.AddListener(stateManager.BotonRecargarBateria);
-        }
-        else
-        {
-            Debug.LogError("[RobotUIManager] Falta asignar 'btnRecargar' en el Inspector.");
+            return;
         }
 
-        if (btnMantenimiento != null)
+        DesconectarBoton(btnRecargar, stateManager.BotonRecargarBateria);
+        DesconectarBoton(btnMantenimiento, stateManager.BotonMantenimiento);
+        DesconectarBoton(btnJugar, stateManager.BotonJugar);
+    }
+
+    private void ConectarBoton(Button boton, UnityAction accion)
+    {
+        if (boton == null)
         {
-            btnMantenimiento.onClick.AddListener(stateManager.BotonMantenimiento);
-        }
-        else
-        {
-            Debug.LogError("[RobotUIManager] Falta asignar 'btnMantenimiento' en el Inspector.");
+            return;
         }
 
-        if (btnJugar != null)
+        // Evita registros duplicados si el ciclo de vida recompone componentes.
+        boton.onClick.RemoveListener(accion);
+        boton.onClick.AddListener(accion);
+    }
+
+    private void DesconectarBoton(Button boton, UnityAction accion)
+    {
+        if (boton != null)
         {
-            btnJugar.onClick.AddListener(stateManager.BotonJugar);
-        }
-        else
-        {
-            Debug.LogError("[RobotUIManager] Falta asignar 'btnJugar' en el Inspector.");
+            boton.onClick.RemoveListener(accion);
         }
     }
 }

@@ -7,6 +7,9 @@ public class RobotStateManager : MonoBehaviour
     [Range(0f, 100f)] public float mantenimiento = 100f;
     [Range(0f, 100f)] public float felicidad = 100f;
 
+    [Header("Enrutamiento Chat")]
+    [SerializeField] private ChatController chatController;
+
     [Header("Desgaste Pasivo")]
     [SerializeField] private float factorDesgaste = 2f;
 
@@ -15,8 +18,7 @@ public class RobotStateManager : MonoBehaviour
 
     private void Update()
     {
-        // Simula el paso del tiempo: energia y felicidad bajan normal,
-        // mantenimiento baja a la mitad de esa velocidad.
+        
         float desgasteNormal = factorDesgaste * Time.deltaTime;
         float desgasteMantenimiento = desgasteNormal * 0.5f;
 
@@ -32,7 +34,7 @@ public class RobotStateManager : MonoBehaviour
         energia = MaxEstado;
         ClampEstados();
 
-        Debug.Log($"[RobotStateManager] Bateria recargada. {EstadoActual()}");
+        EnviarContextoChat(CrearContexto("[SISTEMA]: El usuario acaba de enchufar tu cable y recargar tu batería. Sientes mucha energía. Dale las gracias brevemente."));
     }
 
     public void BotonMantenimiento()
@@ -40,15 +42,14 @@ public class RobotStateManager : MonoBehaviour
         mantenimiento = MaxEstado;
         ClampEstados();
 
-        Debug.Log($"[RobotStateManager] Mantenimiento restaurado. {EstadoActual()}");
+        EnviarContextoChat(CrearContexto("[SISTEMA]: El usuario acaba de hacerte mantenimiento y reparar tus piezas. Te sientes como nuevo. Agradécele."));
     }
 
     public void BotonJugar()
     {
-        // Solo permite jugar si hay suficiente energia y mantenimiento.
         if (energia <= 20f || mantenimiento <= 20f)
         {
-            Debug.Log($"[RobotStateManager] No se pudo jugar (energia/mantenimiento insuficiente). {EstadoActual()}");
+            EnviarContextoChat(CrearContexto("Intento de juego rechazado por energia/mantenimiento insuficiente"));
             return;
         }
 
@@ -58,7 +59,22 @@ public class RobotStateManager : MonoBehaviour
 
         ClampEstados();
 
-        Debug.Log($"[RobotStateManager] Robot jugo correctamente. {EstadoActual()}");
+        EnviarContextoChat(CrearContexto("[SISTEMA]: El usuario acaba de jugar contigo un rato. Estás muy feliz y te divertiste mucho. Comenta sobre el juego."));
+    }
+
+    private void EnviarContextoChat(string contexto)
+    {
+        if (chatController == null)
+        {
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(contexto))
+        {
+            return;
+        }
+
+        chatController.SendPrompt(contexto);
     }
 
     private void ClampEstados()
@@ -71,5 +87,16 @@ public class RobotStateManager : MonoBehaviour
     private string EstadoActual()
     {
         return $"Energia: {energia:F1} | Mantenimiento: {mantenimiento:F1} | Felicidad: {felicidad:F1}";
+    }
+
+    private string CrearContexto(string accion)
+    {
+        string contexto = $"{accion}. Estado actual del robot -> {EstadoActual()}";
+        if (string.IsNullOrWhiteSpace(contexto))
+        {
+            return "Actualizacion de estado del robot.";
+        }
+
+        return contexto;
     }
 }
