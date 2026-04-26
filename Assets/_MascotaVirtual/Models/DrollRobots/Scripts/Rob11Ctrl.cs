@@ -65,6 +65,8 @@ public class Rob11Ctrl : MonoBehaviour
 
     void Update()
     {
+        // Deprecated for mobile AR input: RoboPet action control now comes from RobotStateManager via UI events.
+        // This keyboard loop is kept only for compatibility with the original imported asset.
         anim.SetFloat("Side", Input.GetAxis("Horizontal"));
         anim.SetFloat("Speed", Input.GetAxis("Vertical"));
 
@@ -87,13 +89,13 @@ public class Rob11Ctrl : MonoBehaviour
         {
             if (Input.GetAxis("Vertical")>0.1)
             {
-                Debug.Log("Персонаж толкает объект: ");
+                Debug.Log("пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ: ");
                 anim.SetBool("Push", true);
                 setEmotion(6);
             }
             if (Input.GetAxis("Vertical") < 0.1)
             {
-                Debug.Log("Персонаж толкает объект: ");
+                Debug.Log("пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ: ");
                 anim.SetBool("Push", false);
                 resetEmo();
             }
@@ -281,7 +283,7 @@ public class Rob11Ctrl : MonoBehaviour
         }
         else
         {
-            Debug.LogError("Target Object не назначен!");
+            Debug.LogError("Target Object пїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ!");
         }
     }
 

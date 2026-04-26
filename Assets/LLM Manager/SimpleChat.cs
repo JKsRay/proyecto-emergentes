@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
@@ -25,6 +26,13 @@ public class ChatController : MonoBehaviour
 
     [Header("LLM Setup")]
     public LLMAgent characterAgent;      // Drag the NPC's LLMAgent here
+
+    [Header("Animacion")]
+    public Animator robotAnimator;
+    [SerializeField] private bool autoBuscarAnimator = true;
+
+    public bool IsRequestInFlight => isRequestInFlight;
+    public event Action<bool> RequestInFlightChanged;
 
     private bool isRequestInFlight;
     private readonly Queue<PendingRequest> pendingRequests = new Queue<PendingRequest>();
@@ -63,6 +71,17 @@ public class ChatController : MonoBehaviour
         SendTextToLLM(message, clearInputField: false);
     }
 
+    private void SetRequestInFlight(bool inFlight)
+    {
+        if (isRequestInFlight == inFlight)
+        {
+            return;
+        }
+
+        isRequestInFlight = inFlight;
+        RequestInFlightChanged?.Invoke(inFlight);
+    }
+
     private void SendTextToLLM(string message, bool clearInputField)
     {
         if (string.IsNullOrWhiteSpace(message))
@@ -93,7 +112,7 @@ public class ChatController : MonoBehaviour
             sendButton.interactable = false;
         }
 
-        isRequestInFlight = true;
+        SetRequestInFlight(true);
 
         try
         {
@@ -104,7 +123,8 @@ public class ChatController : MonoBehaviour
         }
         catch (System.Exception)
         {
-            isRequestInFlight = false;
+            SetRobotTalking(false);
+            SetRequestInFlight(false);
             if (sendButton != null)
             {
                 sendButton.interactable = true;
@@ -122,6 +142,8 @@ public class ChatController : MonoBehaviour
 
     void HandleReply(string replySoFar)
     {
+        SetRobotTalking(true);
+
         // Update the text on screen in real-time
         if (aiResponse != null)
         {
@@ -131,8 +153,10 @@ public class ChatController : MonoBehaviour
 
     void DoneReplying()
     {
+        SetRobotTalking(false);
+
         // Re-enable the button when the AI is finished talking
-        isRequestInFlight = false;
+        SetRequestInFlight(false);
         if (sendButton != null)
         {
             sendButton.interactable = true;
@@ -150,5 +174,51 @@ public class ChatController : MonoBehaviour
 
         PendingRequest nextRequest = pendingRequests.Dequeue();
         SendTextToLLM(nextRequest.Message, nextRequest.ClearInputField);
+    }
+
+    private void SetRobotTalking(bool isTalking)
+    {
+        Animator targetAnimator = ResolverAnimatorTalk();
+        if (targetAnimator == null)
+            return;
+
+        targetAnimator.SetBool("Talk", isTalking);
+    }
+
+    private Animator ResolverAnimatorTalk()
+    {
+        if (robotAnimator != null)
+            return robotAnimator;
+
+        if (!autoBuscarAnimator)
+            return null;
+
+        Animator[] animators = FindObjectsByType<Animator>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        foreach (Animator candidate in animators)
+        {
+            if (TieneParametroAnimacion(candidate, "Talk", AnimatorControllerParameterType.Bool))
+            {
+                robotAnimator = candidate;
+                return robotAnimator;
+            }
+        }
+
+        return null;
+    }
+
+    private static bool TieneParametroAnimacion(Animator animator, string parameterName, AnimatorControllerParameterType type)
+    {
+        if (animator == null)
+            return false;
+
+        foreach (AnimatorControllerParameter parameter in animator.parameters)
+        {
+            if (parameter.type == type && parameter.name == parameterName)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

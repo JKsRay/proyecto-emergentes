@@ -1,5 +1,6 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.XR.ARFoundation;
 using UnityEngine.XR.ARSubsystems;
 
@@ -55,6 +56,9 @@ public class PlaceObjectOnPlane : MonoBehaviour
         if (touch.phase != TouchPhase.Began)
             return;
 
+        if (IsTouchOverUI(touch))
+            return;
+
         if (!_raycastManager.Raycast(touch.position, _hits, TrackableType.PlaneWithinPolygon))
             return;
 
@@ -70,6 +74,15 @@ public class PlaceObjectOnPlane : MonoBehaviour
         }
 
         _spawnedObject.transform.SetPositionAndRotation(targetPosition, targetRotation);
+    }
+
+    private static bool IsTouchOverUI(Touch touch)
+    {
+        EventSystem currentEventSystem = EventSystem.current;
+        if (currentEventSystem == null)
+            return false;
+
+        return currentEventSystem.IsPointerOverGameObject(touch.fingerId);
     }
 
     private Vector3 GetPlacementPosition(Pose hitPose)

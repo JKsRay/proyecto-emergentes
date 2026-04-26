@@ -10,6 +10,13 @@ public class RobotStateManager : MonoBehaviour
     [Header("Enrutamiento Chat")]
     [SerializeField] private ChatController chatController;
 
+    [Header("Animacion")]
+    public Animator robotAnimator;
+    [SerializeField] private bool autoBuscarAnimator = true;
+    [SerializeField] private string triggerJugar = "Play";
+    [SerializeField] private string triggerMantenimiento = "Maintain";
+    [SerializeField] private string triggerRecargar = "Recharge";
+
     [Header("Desgaste Pasivo")]
     [SerializeField] private float factorDesgaste = 2f;
 
@@ -34,6 +41,8 @@ public class RobotStateManager : MonoBehaviour
         energia = MaxEstado;
         ClampEstados();
 
+        DispararTriggerAnimacion(triggerRecargar);
+
         EnviarContextoChat(CrearContexto("[SISTEMA]: El usuario acaba de enchufar tu cable y recargar tu batería. Sientes mucha energía. Dale las gracias brevemente."));
     }
 
@@ -42,14 +51,16 @@ public class RobotStateManager : MonoBehaviour
         mantenimiento = MaxEstado;
         ClampEstados();
 
-        EnviarContextoChat(CrearContexto("[SISTEMA]: El usuario acaba de hacerte mantenimiento y reparar tus piezas. Te sientes como nuevo. Agradécele."));
+        DispararTriggerAnimacion(triggerMantenimiento);
+
+        EnviarContextoChat(CrearContexto("[SISTEMA]: El usuario acaba de realizar mantenimiento en ti. Te sientes renovado y listo para funcionar al máximo. Comenta que te sientes mucho mejor después del mantenimiento."));
     }
 
     public void BotonJugar()
     {
         if (energia <= 20f || mantenimiento <= 20f)
         {
-            EnviarContextoChat(CrearContexto("Intento de juego rechazado por energia/mantenimiento insuficiente"));
+            EnviarContextoChat(CrearContexto("[SISTEMA]: El usuario intentó jugar contigo, pero estás demasiado cansado o necesitas mantenimiento. Comenta que te sientes mal y que necesitas recargar o mantenimiento antes de jugar."));
             return;
         }
 
@@ -59,7 +70,68 @@ public class RobotStateManager : MonoBehaviour
 
         ClampEstados();
 
+        DispararTriggerAnimacion(triggerJugar);
+
         EnviarContextoChat(CrearContexto("[SISTEMA]: El usuario acaba de jugar contigo un rato. Estás muy feliz y te divertiste mucho. Comenta sobre el juego."));
+    }
+
+    private void DispararTriggerAnimacion(string triggerName)
+    {
+        if (string.IsNullOrWhiteSpace(triggerName))
+        {
+            return;
+        }
+
+        Animator targetAnimator = ResolverAnimatorConTrigger(triggerName);
+        if (targetAnimator == null)
+        {
+            return;
+        }
+
+        targetAnimator.SetTrigger(triggerName);
+    }
+
+    private Animator ResolverAnimatorConTrigger(string triggerName)
+    {
+        if (TieneParametroAnimacion(robotAnimator, triggerName, AnimatorControllerParameterType.Trigger))
+        {
+            return robotAnimator;
+        }
+
+        if (!autoBuscarAnimator)
+        {
+            return null;
+        }
+
+        Animator[] animators = FindObjectsByType<Animator>(FindObjectsInactive.Exclude, FindObjectsSortMode.None);
+        foreach (Animator candidate in animators)
+        {
+            if (TieneParametroAnimacion(candidate, triggerName, AnimatorControllerParameterType.Trigger))
+            {
+                robotAnimator = candidate;
+                return robotAnimator;
+            }
+        }
+
+        return null;
+    }
+
+    private static bool TieneParametroAnimacion(Animator animator, string parameterName, AnimatorControllerParameterType type)
+    {
+        if (animator == null)
+        {
+            return false;
+        }
+
+        foreach (AnimatorControllerParameter parameter in animator.parameters)
+        {
+            if (parameter.type == type && parameter.name == parameterName)
+            {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private void EnviarContextoChat(string contexto)

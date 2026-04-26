@@ -5,6 +5,7 @@ using UnityEngine.Events;
 public class RobotUIManager : MonoBehaviour
 {
     [SerializeField] private RobotStateManager stateManager;
+    [SerializeField] private ChatController chatController;
 
     [SerializeField] private Button btnRecargar;
     [SerializeField] private Button btnMantenimiento;
@@ -12,26 +13,60 @@ public class RobotUIManager : MonoBehaviour
 
     private void Start()
     {
-        if (stateManager == null)
+        if (chatController == null)
         {
-            return;
+            chatController = FindAnyObjectByType<ChatController>();
         }
 
-        ConectarBoton(btnRecargar, stateManager.BotonRecargarBateria);
-        ConectarBoton(btnMantenimiento, stateManager.BotonMantenimiento);
-        ConectarBoton(btnJugar, stateManager.BotonJugar);
+        if (stateManager != null)
+        {
+            ConectarBoton(btnRecargar, stateManager.BotonRecargarBateria);
+            ConectarBoton(btnMantenimiento, stateManager.BotonMantenimiento);
+            ConectarBoton(btnJugar, stateManager.BotonJugar);
+        }
+
+        if (chatController != null)
+        {
+            chatController.RequestInFlightChanged += OnRequestInFlightChanged;
+            OnRequestInFlightChanged(chatController.IsRequestInFlight);
+        }
     }
 
     private void OnDestroy()
     {
-        if (stateManager == null)
+        if (stateManager != null)
         {
-            return;
+            DesconectarBoton(btnRecargar, stateManager.BotonRecargarBateria);
+            DesconectarBoton(btnMantenimiento, stateManager.BotonMantenimiento);
+            DesconectarBoton(btnJugar, stateManager.BotonJugar);
         }
 
-        DesconectarBoton(btnRecargar, stateManager.BotonRecargarBateria);
-        DesconectarBoton(btnMantenimiento, stateManager.BotonMantenimiento);
-        DesconectarBoton(btnJugar, stateManager.BotonJugar);
+        if (chatController != null)
+        {
+            chatController.RequestInFlightChanged -= OnRequestInFlightChanged;
+        }
+
+        SetBotonesInteractables(true);
+    }
+
+    private void OnRequestInFlightChanged(bool inFlight)
+    {
+        SetBotonesInteractables(!inFlight);
+    }
+
+    private void SetBotonesInteractables(bool interactable)
+    {
+        SetBotonInteractable(btnRecargar, interactable);
+        SetBotonInteractable(btnMantenimiento, interactable);
+        SetBotonInteractable(btnJugar, interactable);
+    }
+
+    private static void SetBotonInteractable(Button boton, bool interactable)
+    {
+        if (boton != null)
+        {
+            boton.interactable = interactable;
+        }
     }
 
     private void ConectarBoton(Button boton, UnityAction accion)
