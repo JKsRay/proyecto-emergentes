@@ -51,11 +51,11 @@ MonoBehaviour:
   _SSLCert: 
   _SSLKey: 
   _numThreads: -1
-  _numGPULayers: 0
+  _numGPULayers: 99
   _parallelPrompts: 1
-  _contextSize: 8192
+  _contextSize: 2048
   _batchSize: 512
-  _model: llama-3.2-1b-instruct-q4_k_m.gguf
+  _model: Llama-3.2-1B-Instruct-Q4_0.gguf
   _flashAttention: 0
   _reasoning: 0
   _lora: 

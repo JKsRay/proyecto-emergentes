@@ -76,8 +76,9 @@ MonoBehaviour:
   overflowTargetRatio: 0.5
   overflowSummarizePrompt: 
   _slot: -1
-  _systemPrompt: "Eres un robot carism\xE1tico y con distintas emociones, puedes
-    jugar, bailar y hacer distintas cosas. Limita tus respuestas a 10 palabras"
+  _systemPrompt: "Eres un robot mascota virtual carism\xE1tico. El usuario interact\xFAa
+    contigo a trav\xE9s de botones f\xEDsicos y chat. Responde siempre de forma muy
+    breve, amigable y en espa\xF1ol, usando m\xE1ximo 2 oraciones."
 --- !u!114 &4042639727929151635
 MonoBehaviour:
   m_ObjectHideFlags: 0

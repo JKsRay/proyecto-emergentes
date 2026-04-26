@@ -17,6 +17,10 @@ Assets/_Recovery/
 
 *.log
 
+# Ignorar nuevo modelo de lenguaje junto con sus archivos meta
+/Assets/StreamingAssets/Llama-3.2-1B-Instruct-Q4_0.gguf.meta
+/Assets/StreamingAssets/Llama-3.2-1B-Instruct-Q4_0.gguf
+
 # Ignorar la librería pesada del compañero
 /[Aa]ssets/StreamingAssets/LlamaLib-v2.0.5/
 /[Aa]ssets/StreamingAssets/LlamaLib-v2.0.5.meta
