@@ -216,6 +216,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 10fc09ce5d97e5e438937a2f9e74eeda, type: 3}
       insertIndex: -1
       addedObject: {fileID: 151167219148853301}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 10fc09ce5d97e5e438937a2f9e74eeda, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1970120855531028878}
     - targetCorrespondingSourceObject: {fileID: -1780761857780665197, guid: 10fc09ce5d97e5e438937a2f9e74eeda, type: 3}
       insertIndex: -1
       addedObject: {fileID: 4963972144276186528}
@@ -359,6 +362,28 @@ CapsuleCollider:
   m_Height: 0.47906518
   m_Direction: 1
   m_Center: {x: 0.04247185, y: -0.0986664, z: -0.30293941}
+--- !u!114 &1970120855531028878
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3816680439377690400}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7aa032c8823e07a4eaef032c90086d0a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RobotStateManager
+  energia: 100
+  mantenimiento: 100
+  felicidad: 100
+  chatController: {fileID: 0}
+  robotAnimator: {fileID: 7592064960017235936}
+  autoBuscarAnimator: 1
+  triggerJugar: Play
+  triggerMantenimiento: Maintain
+  triggerRecargar: Recharge
+  factorDesgaste: 2
 --- !u!4 &4592618355574810010 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 10fc09ce5d97e5e438937a2f9e74eeda, type: 3}
@@ -399,5 +424,10 @@ MonoBehaviour:
 --- !u!1 &6941141820575694022 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 6369524492863110839, guid: 10fc09ce5d97e5e438937a2f9e74eeda, type: 3}
+  m_PrefabInstance: {fileID: 4050701384969142897}
+  m_PrefabAsset: {fileID: 0}
+--- !u!95 &7592064960017235936 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 5866666021909216657, guid: 10fc09ce5d97e5e438937a2f9e74eeda, type: 3}
   m_PrefabInstance: {fileID: 4050701384969142897}
   m_PrefabAsset: {fileID: 0}
