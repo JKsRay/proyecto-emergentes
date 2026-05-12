@@ -2,10 +2,42 @@ using UnityEngine;
 
 public class RobotStateManager : MonoBehaviour
 {
+    // ── Singleton ──────────────────────────────────────────────
+    /// <summary>
+    /// Instancia única del robot activo en la escena.
+    /// Se asigna automáticamente al instanciarse el prefab.
+    /// </summary>
+    public static RobotStateManager Instance { get; private set; }
+
+    public enum RobotState 
+    { 
+        BateriaCritica, 
+        SucioGrunon, 
+        Aburrido, 
+        Euforico, 
+        Normal 
+    }
+
     [Header("Estado del Robot")]
-    [Range(0f, 100f)] public float energia = 100f;
-    [Range(0f, 100f)] public float mantenimiento = 100f;
-    [Range(0f, 100f)] public float felicidad = 100f;
+    [SerializeField, Range(0f, 100f)] private float energia = 100f;
+    [SerializeField, Range(0f, 100f)] private float mantenimiento = 100f;
+    [SerializeField, Range(0f, 100f)] private float felicidad = 100f;
+
+    public float Energia => energia;
+    public float Mantenimiento => mantenimiento;
+    public float Felicidad => felicidad;
+
+    public RobotState CurrentState
+    {
+        get
+        {
+            if (energia <= 20f) return RobotState.BateriaCritica;
+            if (mantenimiento <= 20f) return RobotState.SucioGrunon;
+            if (felicidad <= 30f) return RobotState.Aburrido;
+            if (felicidad >= 80f) return RobotState.Euforico;
+            return RobotState.Normal;
+        }
+    }
 
     [Header("Enrutamiento Chat")]
     [SerializeField] private ChatController chatController;
@@ -22,6 +54,34 @@ public class RobotStateManager : MonoBehaviour
 
     private const float MinEstado = 0f;
     private const float MaxEstado = 100f;
+
+    // ── Ciclo de vida ──────────────────────────────────────────
+    private void Awake()
+    {
+        // Singleton: si ya existe otra instancia, destruir esta.
+        if (Instance != null && Instance != this)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        Instance = this;
+
+        // El ChatController vive en la escena (Canvas), no en el prefab,
+        // así que lo buscamos dinámicamente si no fue asignado.
+        if (chatController == null)
+        {
+            chatController = FindAnyObjectByType<ChatController>();
+        }
+    }
+
+    private void OnDestroy()
+    {
+        // Limpiar la referencia estática si esta instancia es la activa.
+        if (Instance == this)
+        {
+            Instance = null;
+        }
+    }
 
     private void Update()
     {
@@ -58,7 +118,8 @@ public class RobotStateManager : MonoBehaviour
 
     public void BotonJugar()
     {
-        if (energia <= 20f || mantenimiento <= 20f)
+        RobotState estadoActual = CurrentState;
+        if (estadoActual == RobotState.BateriaCritica || estadoActual == RobotState.SucioGrunon)
         {
             EnviarContextoChat(CrearContexto("[SISTEMA]: El usuario intentó jugar contigo, pero estás demasiado cansado o necesitas mantenimiento. Comenta que te sientes mal y que necesitas recargar o mantenimiento antes de jugar."));
             return;
@@ -158,12 +219,25 @@ public class RobotStateManager : MonoBehaviour
 
     private string EstadoActual()
     {
-        return $"Energia: {energia:F1} | Mantenimiento: {mantenimiento:F1} | Felicidad: {felicidad:F1}";
+        switch (CurrentState)
+        {
+            case RobotState.BateriaCritica:
+                return "[SISTEMA: Batería crítica. Estás exhausto, niegas interactuar y exiges un cargador.]";
+            case RobotState.SucioGrunon:
+                return "[SISTEMA: Mantenimiento bajo. Estás mañoso, te quejas de polvo en tus engranajes y exiges limpieza.]";
+            case RobotState.Aburrido:
+                return "[SISTEMA: Felicidad baja. Estás aburrido, das respuestas cortantes o irónicas pidiendo atención.]";
+            case RobotState.Euforico:
+                return "[SISTEMA: Felicidad alta. Funcionamiento óptimo, estás de excelente humor dentro de tu sarcasmo habitual.]";
+            case RobotState.Normal:
+            default:
+                return "[SISTEMA: Estado óptimo. Respondes con tu sarcasmo robótico habitual.]";
+        }
     }
 
     private string CrearContexto(string accion)
     {
-        string contexto = $"{accion}. Estado actual del robot -> {EstadoActual()}";
+        string contexto = $"{accion} {EstadoActual()}";
         if (string.IsNullOrWhiteSpace(contexto))
         {
             return "Actualizacion de estado del robot.";
