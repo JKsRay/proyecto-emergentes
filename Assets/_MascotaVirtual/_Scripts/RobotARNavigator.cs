@@ -13,6 +13,7 @@ public class RobotARNavigator : MonoBehaviour
     private readonly int triggerJump = Animator.StringToHash("Jump");
 
     private Coroutine movementCoroutine;
+    private bool isGameActive = false;
 
     private void Awake()
     {
@@ -25,6 +26,7 @@ public class RobotARNavigator : MonoBehaviour
         // Suscribirse a los eventos del minijuego
         MinigameManager.OnGameStarted += HandleGameStarted;
         MinigameManager.OnRobotCaught += HandleRobotCaught;
+        MinigameManager.OnGameEnded += HandleGameEnded;
     }
 
     private void OnDisable()
@@ -32,44 +34,76 @@ public class RobotARNavigator : MonoBehaviour
         // Desuscribirse para evitar colisiones en memoria
         MinigameManager.OnGameStarted -= HandleGameStarted;
         MinigameManager.OnRobotCaught -= HandleRobotCaught;
+        MinigameManager.OnGameEnded -= HandleGameEnded;
     }
 
-    private void HandleGameStarted()
+    private void HandleGameEnded()
     {
-        // Iniciar el comportamiento del robot evadiendo/navegando
-        if (movementCoroutine != null)
-        {
-            StopCoroutine(movementCoroutine);
-        }
-        movementCoroutine = StartCoroutine(NavigateRandomly());
-    }
+        isGameActive = false;
 
-    private void HandleRobotCaught()
-    {
-        // Disparar la animación de salto
-        animator.SetTrigger(triggerJump);
-        
-        // Detener la navegación al ser atrapado
         if (movementCoroutine != null)
         {
             StopCoroutine(movementCoroutine);
             movementCoroutine = null;
         }
+
+        if (animator != null)
+        {
+            animator.Play("Motions");
+            animator.Rebind();
+            animator.Update(0f);
+        }
     }
 
-    private IEnumerator NavigateRandomly()
+    private void HandleGameStarted()
     {
-        while (true)
+        isGameActive = true;
+
+        // Iniciar el comportamiento del robot con un delay inicial ("Telegraphing")
+        if (movementCoroutine != null)
         {
-            Vector3 targetPosition = GetRandomPositionOnPlanes();
-            
-            // Si el punto devuelto es la misma posición (ej. no hay planos), esperar
-            if (Vector3.Distance(targetPosition, transform.position) < 0.1f)
-            {
-                yield return new WaitForSeconds(1f);
-                continue;
-            }
-            
+            StopCoroutine(movementCoroutine);
+        }
+        movementCoroutine = StartCoroutine(StartGameWithDelay());
+    }
+
+    private IEnumerator StartGameWithDelay()
+    {
+        // 4 Segundos de Telegraphing antes de que el robot se empiece a mover
+        yield return new WaitForSeconds(4f);
+        movementCoroutine = StartCoroutine(MoveToSinglePosition());
+    }
+
+    private void HandleRobotCaught()
+    {
+        if (!isGameActive) return;
+
+        // Disparar la animación de salto
+        animator.SetTrigger(triggerJump);
+        
+        // Detener la navegación actual y empezar la recuperación
+        if (movementCoroutine != null)
+        {
+            StopCoroutine(movementCoroutine);
+        }
+        movementCoroutine = StartCoroutine(RecoverAndFlee());
+    }
+
+    private IEnumerator RecoverAndFlee()
+    {
+        // El salto y festejo del robot (aprox 2 segundos)
+        yield return new WaitForSeconds(2f);
+        // Cuando termine el salto, huye y se posiciona en una nueva ubicación hasta que vuelvan a tocarlo
+        movementCoroutine = StartCoroutine(MoveToSinglePosition());
+    }
+
+    private IEnumerator MoveToSinglePosition()
+    {
+        Vector3 targetPosition = GetRandomPositionOnPlanes();
+        
+        // Si el punto devuelto es la misma posición (ej. no hay planos), no hace nada hasta el próximo trigger o simplemente se queda ahí
+        if (Vector3.Distance(targetPosition, transform.position) > 0.1f)
+        {
             float duration = 2.0f; // Tiempo que toma desplazarse al punto
             float elapsed = 0f;
             Vector3 startPos = transform.position;
@@ -82,7 +116,7 @@ public class RobotARNavigator : MonoBehaviour
                 // Mover al robot suavemente con Lerp
                 transform.position = Vector3.Lerp(startPos, targetPosition, t);
 
-                // Rotar para mirar a la cámara permanentemente durante el minijuego
+                // Rotar para mirar a la cámara permanentemente durante su movimiento
                 if (mainCamera != null)
                 {
                     Vector3 lookPos = mainCamera.transform.position;
@@ -99,14 +133,14 @@ public class RobotARNavigator : MonoBehaviour
 
                 yield return null;
             }
-
-            // Interrupción entre movimientos aleatorios
-            yield return new WaitForSeconds(Random.Range(1f, 2.5f));
         }
+        
+        // Una vez alcanzó el punto, la corrutina termina y el robot NO se moverá de nuevo automáticamente.
+        // Se queda en Idle y mirando hacia donde quedó hasta que lo toquen de nuevo.
     }
 
     /// <summary>
-    /// Calcula un punto aleatorio en un radio de 2 metros asegurándose 
+    /// Calcula un punto aleatorio en un radio de 3 metros asegurándose 
     /// de referenciar la altura de un plano AR Horizontal detectado.
     /// </summary>
     private Vector3 GetRandomPositionOnPlanes()
@@ -117,8 +151,8 @@ public class RobotARNavigator : MonoBehaviour
         if (arPlanes == null || arPlanes.Length == 0) 
             return transform.position;
 
-        // Limitar radio a 2 metros desde la posición actual del robot
-        Vector2 randomCircle = Random.insideUnitCircle * 2f;
+        // Limitar radio a 3 metros desde la posición actual del robot
+        Vector2 randomCircle = Random.insideUnitCircle * 3f;
         Vector3 candidatePos = transform.position + new Vector3(randomCircle.x, 0, randomCircle.y);
 
         ARPlane bestPlane = null;
