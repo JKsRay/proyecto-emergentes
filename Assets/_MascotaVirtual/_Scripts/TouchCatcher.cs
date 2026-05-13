@@ -15,6 +15,22 @@ public class TouchCatcher : MonoBehaviour
     private Camera mainCamera;
     private bool canCatch = true;
     private float cooldownTimer = 0f;
+    private bool isGameActive = false;
+
+    private void OnEnable()
+    {
+        MinigameManager.OnGameStarted += SetGameActive;
+        MinigameManager.OnGameEnded += SetGameInactive;
+    }
+
+    private void OnDisable()
+    {
+        MinigameManager.OnGameStarted -= SetGameActive;
+        MinigameManager.OnGameEnded -= SetGameInactive;
+    }
+
+    private void SetGameActive() => isGameActive = true;
+    private void SetGameInactive() => isGameActive = false;
 
     private void Start()
     {
@@ -28,6 +44,8 @@ public class TouchCatcher : MonoBehaviour
 
     private void Update()
     {
+        if (!isGameActive) return;
+
         // Manejar el cooldown
         if (!canCatch)
         {
