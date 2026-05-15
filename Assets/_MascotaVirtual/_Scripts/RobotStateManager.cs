@@ -131,8 +131,6 @@ public class RobotStateManager : MonoBehaviour
 
         ClampEstados();
 
-        DispararTriggerAnimacion(triggerJugar);
-
         EnviarContextoChat(CrearContexto("[SISTEMA]: El usuario acaba de jugar contigo un rato. Estás muy feliz y te divertiste mucho. Comenta sobre el juego."));
     }
 

@@ -1,11 +1,17 @@
 using UnityEngine;
 using System;
+using System.Collections;
+using TMPro;
 
 public class MinigameManager : MonoBehaviour
 {
     [Header("Paneles de Interfaz")]
     public GameObject panelChat;
     public GameObject panelJuego;
+
+    [Header("UI Textos")]
+    public TextMeshProUGUI Texto_CuentaRegresiva;
+    public TextMeshProUGUI Texto_ContadorCapturas;
 
     [Header("Eventos del Minijuego")]
     public static Action OnGameStarted;
@@ -29,9 +35,18 @@ public class MinigameManager : MonoBehaviour
     private void HandleRobotCaught()
     {
         catchCount++;
+        UpdateCatchCounterText();
         if (catchCount >= catchesToWin)
         {
             EndGame();
+        }
+    }
+
+    private void UpdateCatchCounterText()
+    {
+        if (Texto_ContadorCapturas != null)
+        {
+            Texto_ContadorCapturas.text = $"Atrápame {catchCount}/{catchesToWin}";
         }
     }
 
@@ -44,7 +59,29 @@ public class MinigameManager : MonoBehaviour
         if (panelChat != null) panelChat.SetActive(false);
         if (panelJuego != null) panelJuego.SetActive(true);
 
+        UpdateCatchCounterText();
+        StartCoroutine(StartCountdown());
+
         OnGameStarted?.Invoke();
+    }
+
+    private IEnumerator StartCountdown()
+    {
+        if (Texto_CuentaRegresiva != null)
+        {
+            Texto_CuentaRegresiva.gameObject.SetActive(true);
+            Texto_CuentaRegresiva.text = "4";
+            yield return new WaitForSeconds(1f);
+            Texto_CuentaRegresiva.text = "3";
+            yield return new WaitForSeconds(1f);
+            Texto_CuentaRegresiva.text = "2";
+            yield return new WaitForSeconds(1f);
+            Texto_CuentaRegresiva.text = "1";
+            yield return new WaitForSeconds(1f);
+            Texto_CuentaRegresiva.text = "¡YA!";
+            yield return new WaitForSeconds(1f);
+            Texto_CuentaRegresiva.gameObject.SetActive(false);
+        }
     }
 
     /// <summary>

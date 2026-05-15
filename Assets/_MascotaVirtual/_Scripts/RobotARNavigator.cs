@@ -69,7 +69,17 @@ public class RobotARNavigator : MonoBehaviour
 
     private IEnumerator StartGameWithDelay()
     {
-        // 4 Segundos de Telegraphing antes de que el robot se empiece a mover
+        // Para evitar interferencia con el RobotStateManager (que dispara la animación de baile al mismo tiempo
+        // desde el botón Jugar), limpiamos cualquier trigger residual esperando 1 frame para que se procesen los eventos paralelos.
+        yield return null;
+        
+        if (animator != null)
+        {
+            animator.Rebind(); // Forzar el Animator nuevamente a su flujo por defecto (Idle)
+            animator.Update(0f);
+        }
+
+        // 4 Segundos de Telegraphing antes de que el robot se empiece a mover (cuenta regresiva UI)
         yield return new WaitForSeconds(4f);
         movementCoroutine = StartCoroutine(MoveToSinglePosition());
     }
