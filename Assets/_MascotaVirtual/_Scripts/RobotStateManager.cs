@@ -12,7 +12,7 @@ public class RobotStateManager : MonoBehaviour
     public enum RobotState 
     { 
         BateriaCritica, 
-        SucioGrunon, 
+        Descalibrado,   // Anteriormente: SucioGrunon
         Aburrido, 
         Euforico, 
         Normal 
@@ -32,7 +32,7 @@ public class RobotStateManager : MonoBehaviour
         get
         {
             if (energia <= 20f) return RobotState.BateriaCritica;
-            if (mantenimiento <= 20f) return RobotState.SucioGrunon;
+            if (mantenimiento <= 20f) return RobotState.Descalibrado;
             if (felicidad <= 30f) return RobotState.Aburrido;
             if (felicidad >= 80f) return RobotState.Euforico;
             return RobotState.Normal;
@@ -49,8 +49,13 @@ public class RobotStateManager : MonoBehaviour
     [SerializeField] private string triggerMantenimiento = "Maintain";
     [SerializeField] private string triggerRecargar = "Recharge";
 
-    [Header("Desgaste Pasivo")]
-    [SerializeField] private float factorDesgaste = 2f;
+    // ── Intervalos de desgaste pasivo (segundos) ──────────────
+    // La Energía y la Felicidad decaen 2 pts. cada N segundos.
+    // El Mantenimiento NO tiene desgaste pasivo por tiempo;
+    // su degradación es exclusiva por acciones/uso.
+    private const float IntervaloDesgasteEnergia    = 20f; // -2 pts. cada 20 s
+    private const float IntervaloDesgasteFelicidad  = 10f; // -2 pts. cada 10 s
+    private const float PuntosDesgastePasivo        = 2f;
 
     private const float MinEstado = 0f;
     private const float MaxEstado = 100f;
@@ -74,6 +79,28 @@ public class RobotStateManager : MonoBehaviour
         }
     }
 
+    private void Start()
+    {
+        // Iniciar las corrutinas de desgaste pasivo.
+        // Se usan corrutinas con WaitForSeconds en lugar de Update()
+        // para evitar cálculos por frame y reducir la carga del CPU.
+        StartCoroutine(DesgasteEnergiaPasivo());
+        StartCoroutine(DesgasteFelicidadPasivo());
+    }
+
+    private void OnEnable()
+    {
+        // Suscribirse al evento de captura del minijuego de la compañera.
+        // Si MinigameManager cambia de nombre o estructura, solo esta línea cambia.
+        MinigameManager.OnRobotCaught += AplicarResultadoCaptura;
+    }
+
+    private void OnDisable()
+    {
+        // Desuscribirse para evitar memory leaks si el prefab es destruido.
+        MinigameManager.OnRobotCaught -= AplicarResultadoCaptura;
+    }
+
     private void OnDestroy()
     {
         // Limpiar la referencia estática si esta instancia es la activa.
@@ -83,17 +110,29 @@ public class RobotStateManager : MonoBehaviour
         }
     }
 
-    private void Update()
+    // ── Corrutinas de Desgaste Pasivo ──────────────────────────
+    // Cada corrutina duerme N segundos y luego aplica exactamente
+    // 2 puntos de penalización. Infinitamente más eficiente que
+    // calcular deltaTime acumulado en Update() cada frame.
+
+    private System.Collections.IEnumerator DesgasteEnergiaPasivo()
     {
-        
-        float desgasteNormal = factorDesgaste * Time.deltaTime;
-        float desgasteMantenimiento = desgasteNormal * 0.5f;
+        var espera = new WaitForSeconds(IntervaloDesgasteEnergia);
+        while (true)
+        {
+            yield return espera;
+            energia = Mathf.Clamp(energia - PuntosDesgastePasivo, MinEstado, MaxEstado);
+        }
+    }
 
-        energia -= desgasteNormal;
-        felicidad -= desgasteNormal;
-        mantenimiento -= desgasteMantenimiento;
-
-        ClampEstados();
+    private System.Collections.IEnumerator DesgasteFelicidadPasivo()
+    {
+        var espera = new WaitForSeconds(IntervaloDesgasteFelicidad);
+        while (true)
+        {
+            yield return espera;
+            felicidad = Mathf.Clamp(felicidad - PuntosDesgastePasivo, MinEstado, MaxEstado);
+        }
     }
 
     public void BotonRecargarBateria()
@@ -119,19 +158,37 @@ public class RobotStateManager : MonoBehaviour
     public void BotonJugar()
     {
         RobotState estadoActual = CurrentState;
-        if (estadoActual == RobotState.BateriaCritica || estadoActual == RobotState.SucioGrunon)
+        if (estadoActual == RobotState.BateriaCritica || estadoActual == RobotState.Descalibrado)
         {
             EnviarContextoChat(CrearContexto("[SISTEMA]: El usuario intentó jugar contigo, pero estás demasiado cansado o necesitas mantenimiento. Comenta que te sientes mal y que necesitas recargar o mantenimiento antes de jugar."));
             return;
         }
 
-        felicidad += 30f;
-        energia -= 15f;
-        mantenimiento -= 10f;
+        // Costo real de actividad física del botón Jugar.
+        felicidad     += 30f;
+        energia       -= 15f;
+        mantenimiento -= 30f;
 
         ClampEstados();
 
         EnviarContextoChat(CrearContexto("[SISTEMA]: El usuario acaba de jugar contigo un rato. Estás muy feliz y te divertiste mucho. Comenta sobre el juego."));
+    }
+
+    /// <summary>
+    /// Punto de acceso exclusivo para el módulo de Realidad Aumentada.
+    /// Aplica las consecuencias matemáticas de que el usuario atrape al robot
+    /// durante el minijuego. Este método SOLO muta estadísticas; la inyección
+    /// de prompts al LLM es responsabilidad del script de AR que lo invoque.
+    /// 
+    /// Suscrito automáticamente a MinigameManager.OnRobotCaught.
+    /// </summary>
+    public void AplicarResultadoCaptura()
+    {
+        felicidad     += 50f;
+        energia       -= 15f;
+        mantenimiento -= 30f;
+
+        ClampEstados();
     }
 
     private void DispararTriggerAnimacion(string triggerName)
@@ -221,8 +278,8 @@ public class RobotStateManager : MonoBehaviour
         {
             case RobotState.BateriaCritica:
                 return "[SISTEMA: Batería crítica. Estás exhausto, niegas interactuar y exiges un cargador.]";
-            case RobotState.SucioGrunon:
-                return "[SISTEMA: Mantenimiento bajo. Estás mañoso, te quejas de polvo en tus engranajes y exiges limpieza.]";
+            case RobotState.Descalibrado:
+                return "[SISTEMA: Tus sistemas mecánicos están descalibrados y con fallas. Adoptas una personalidad mañosa y extremadamente sarcástica. Te quejas amargamente de vibraciones en tus servomotores, desgaste en tus articulaciones y errores en tus sensores. Das respuestas cortantes, interrumpes con quejas técnicas y exiges mantenimiento inmediato antes de hacer cualquier cosa.]";
             case RobotState.Aburrido:
                 return "[SISTEMA: Felicidad baja. Estás aburrido, das respuestas cortantes o irónicas pidiendo atención.]";
             case RobotState.Euforico:
