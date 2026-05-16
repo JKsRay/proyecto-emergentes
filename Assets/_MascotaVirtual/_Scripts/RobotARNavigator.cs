@@ -15,6 +15,9 @@ public class RobotARNavigator : MonoBehaviour
     private Coroutine movementCoroutine;
     private bool isGameActive = false;
 
+    // Memoria del movimiento previo para heurística de rebote ("anti-paredes")
+    private Vector3 lastMoveDirection = Vector3.zero;
+
     private void Awake()
     {
         animator = GetComponent<Animator>();
@@ -69,7 +72,17 @@ public class RobotARNavigator : MonoBehaviour
 
     private IEnumerator StartGameWithDelay()
     {
-        // 4 Segundos de Telegraphing antes de que el robot se empiece a mover
+        // Para evitar interferencia con el RobotStateManager (que dispara la animación de baile al mismo tiempo
+        // desde el botón Jugar), limpiamos cualquier trigger residual esperando 1 frame para que se procesen los eventos paralelos.
+        yield return null;
+        
+        if (animator != null)
+        {
+            animator.Rebind(); // Forzar el Animator nuevamente a su flujo por defecto (Idle)
+            animator.Update(0f);
+        }
+
+        // 4 Segundos de Telegraphing antes de que el robot se empiece a mover (cuenta regresiva UI)
         yield return new WaitForSeconds(4f);
         movementCoroutine = StartCoroutine(MoveToSinglePosition());
     }
@@ -140,20 +153,63 @@ public class RobotARNavigator : MonoBehaviour
     }
 
     /// <summary>
-    /// Calcula un punto aleatorio en un radio de 3 metros asegurándose 
-    /// de referenciar la altura de un plano AR Horizontal detectado.
+    /// Calcula un punto aleatorio asegurándose de referenciar la altura 
+    /// de un plano AR Horizontal detectado, optimizado para interiores pequeños.
+    /// Utiliza una heurística de rebote para evitar continuar en la misma dirección.
     /// </summary>
     private Vector3 GetRandomPositionOnPlanes()
     {
         // Buscar todos los planos AR en la jerarquía
-        ARPlane[] arPlanes = Object.FindObjectsOfType<ARPlane>();
+        ARPlane[] arPlanes = Object.FindObjectsByType<ARPlane>(FindObjectsSortMode.None);
 
         if (arPlanes == null || arPlanes.Length == 0) 
             return transform.position;
 
-        // Limitar radio a 3 metros desde la posición actual del robot
-        Vector2 randomCircle = Random.insideUnitCircle * 3f;
-        Vector3 candidatePos = transform.position + new Vector3(randomCircle.x, 0, randomCircle.y);
+        Vector2 randomDir = Vector2.zero;
+        
+        // --- Heurística Anti-Paredes ---
+        // Intentar hasta 10 veces encontrar un vector que diverja significativamente del último movimiento.
+        // Queremos un producto punto <= 0.2f (es decir, el robot debe girar bruscamente al menos ~78 grados).
+        float targetDot = 0.2f;
+        float bestDot = float.MaxValue;
+        
+        for (int i = 0; i < 10; i++)
+        {
+            Vector2 candidateDir = Random.insideUnitCircle.normalized;
+            
+            // Si es el primer movimiento del juego, aceptarlo libremente
+            if (lastMoveDirection == Vector3.zero)
+            {
+                randomDir = candidateDir;
+                break;
+            }
+
+            Vector3 candidate3D = new Vector3(candidateDir.x, 0, candidateDir.y);
+            float dot = Vector3.Dot(candidate3D, lastMoveDirection);
+
+            // Si el ángulo de escape es suficientemente distinto al de la corrida anterior
+            if (dot <= targetDot)
+            {
+                randomDir = candidateDir;
+                break;
+            }
+
+            // Guardar el "menos malo" por si se agotan los 10 intentos
+            if (dot < bestDot)
+            {
+                bestDot = dot;
+                randomDir = candidateDir;
+            }
+        }
+
+        // Limitar distancia de huida asegurando que el robot se mueva al menos 1 metro, máximo 1.5 metros, adaptado a habitaciones pequeñas
+        float randomDistance = Random.Range(1.0f, 1.5f);
+        Vector2 escapeVector = randomDir * randomDistance;
+        
+        Vector3 candidatePos = transform.position + new Vector3(escapeVector.x, 0, escapeVector.y);
+
+        // Actualizar la memoria direccional para la próxima vez que huya
+        lastMoveDirection = new Vector3(escapeVector.x, 0, escapeVector.y).normalized;
 
         ARPlane bestPlane = null;
         float closestDistance = float.MaxValue;
