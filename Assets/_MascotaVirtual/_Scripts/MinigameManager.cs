@@ -17,6 +17,7 @@ public class MinigameManager : MonoBehaviour
     public static Action OnGameStarted;
     public static Action OnGameEnded;
     public static Action OnRobotCaught;
+    public static Action OnGameWon;
 
     // Sistema temporal de 'Mocking'
     private int catchCount = 0;
@@ -38,6 +39,7 @@ public class MinigameManager : MonoBehaviour
         UpdateCatchCounterText();
         if (catchCount >= catchesToWin)
         {
+            OnGameWon?.Invoke();
             EndGame();
         }
     }
@@ -55,6 +57,16 @@ public class MinigameManager : MonoBehaviour
     /// </summary>
     public void StartGame()
     {
+        // Validación: impedir iniciar juego si el estado del robot es crítico
+        if (RobotStateManager.Instance != null)
+        {
+            var estado = RobotStateManager.Instance.CurrentState;
+            if (estado == RobotStateManager.RobotState.BateriaCritica || estado == RobotStateManager.RobotState.Descalibrado)
+            {
+                return; // Se cancela el inicio del juego visual de AR.
+            }
+        }
+
         catchCount = 0;
         if (panelChat != null) panelChat.SetActive(false);
         if (panelJuego != null) panelJuego.SetActive(true);

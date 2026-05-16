@@ -20,9 +20,16 @@ public class PlaceObjectOnPlane : MonoBehaviour
     private float hoverHeight = 0.1f;
 
     private ARRaycastManager _raycastManager;
+    private ARPlaneManager _planeManager;
     private readonly List<ARRaycastHit> _hits = new();
     private GameObject _spawnedObject;
     private bool _warnedMissingPrefab;
+    private bool _isPlacementLocked;
+
+    public void UnlockPlacement()
+    {
+        _isPlacementLocked = false;
+    }
 
     private void Awake()
     {
@@ -31,6 +38,34 @@ public class PlaceObjectOnPlane : MonoBehaviour
         {
             Debug.LogError($"{nameof(PlaceObjectOnPlane)} requires an {nameof(ARRaycastManager)} component on the same GameObject.");
         }
+
+        _planeManager = GetComponent<ARPlaneManager>();
+        if (_planeManager != null)
+        {
+            _planeManager.planesChanged += OnPlanesChanged;
+        }
+    }
+
+    private void OnDestroy()
+    {
+        if (_planeManager != null)
+        {
+            _planeManager.planesChanged -= OnPlanesChanged;
+        }
+    }
+
+    private void OnPlanesChanged(ARPlanesChangedEventArgs args)
+    {
+        foreach (ARPlane plane in args.added)  HidePlaneVisuals(plane);
+        foreach (ARPlane plane in args.updated) HidePlaneVisuals(plane);
+    }
+
+    private void HidePlaneVisuals(ARPlane plane)
+    {
+        if (plane.TryGetComponent(out MeshRenderer meshRenderer))
+            meshRenderer.enabled = false;
+        if (plane.TryGetComponent(out LineRenderer lineRenderer))
+            lineRenderer.enabled = false;
     }
 
     private void Update()
@@ -59,6 +94,9 @@ public class PlaceObjectOnPlane : MonoBehaviour
         if (IsTouchOverUI(touch))
             return;
 
+        if (_isPlacementLocked)
+            return;
+
         if (!_raycastManager.Raycast(touch.position, _hits, TrackableType.PlaneWithinPolygon))
             return;
 
@@ -70,19 +108,27 @@ public class PlaceObjectOnPlane : MonoBehaviour
         if (_spawnedObject == null)
         {
             _spawnedObject = Instantiate(objectPrefab, targetPosition, targetRotation);
+            _isPlacementLocked = true;
             return;
         }
 
         _spawnedObject.transform.SetPositionAndRotation(targetPosition, targetRotation);
+        _isPlacementLocked = true;
     }
 
     private static bool IsTouchOverUI(Touch touch)
     {
-        EventSystem currentEventSystem = EventSystem.current;
-        if (currentEventSystem == null)
+        if (EventSystem.current == null) 
             return false;
+        
+        PointerEventData eventData = new PointerEventData(EventSystem.current)
+        {
+            position = touch.position
+        };
 
-        return currentEventSystem.IsPointerOverGameObject(touch.fingerId);
+        var results = new List<RaycastResult>();
+        EventSystem.current.RaycastAll(eventData, results);
+        return results.Count > 0;
     }
 
     private Vector3 GetPlacementPosition(Pose hitPose)

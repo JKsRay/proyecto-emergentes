@@ -57,6 +57,9 @@ public class RobotStateManager : MonoBehaviour
     private const float IntervaloDesgasteFelicidad  = 10f; // -2 pts. cada 10 s
     private const float PuntosDesgastePasivo        = 2f;
 
+    private bool isGameActive = false;
+    private bool wasGameWon = false;
+
     private const float MinEstado = 0f;
     private const float MaxEstado = 100f;
 
@@ -90,15 +93,33 @@ public class RobotStateManager : MonoBehaviour
 
     private void OnEnable()
     {
-        // Suscribirse al evento de captura del minijuego de la compañera.
-        // Si MinigameManager cambia de nombre o estructura, solo esta línea cambia.
-        MinigameManager.OnRobotCaught += AplicarResultadoCaptura;
+        // Suscribirse a los eventos del minijuego para controlar estado y bloquear desgaste.
+        MinigameManager.OnGameWon += AplicarResultadoVictoria;
+        MinigameManager.OnGameStarted += HandleGameStarted;
+        MinigameManager.OnGameEnded += HandleGameEnded;
     }
 
     private void OnDisable()
     {
         // Desuscribirse para evitar memory leaks si el prefab es destruido.
-        MinigameManager.OnRobotCaught -= AplicarResultadoCaptura;
+        MinigameManager.OnGameWon -= AplicarResultadoVictoria;
+        MinigameManager.OnGameStarted -= HandleGameStarted;
+        MinigameManager.OnGameEnded -= HandleGameEnded;
+    }
+
+    private void HandleGameStarted()
+    {
+        isGameActive = true;
+        wasGameWon = false;
+    }
+
+    private void HandleGameEnded()
+    {
+        isGameActive = false;
+        if (!wasGameWon)
+        {
+            AplicarResultadoCancelado();
+        }
     }
 
     private void OnDestroy()
@@ -121,7 +142,10 @@ public class RobotStateManager : MonoBehaviour
         while (true)
         {
             yield return espera;
-            energia = Mathf.Clamp(energia - PuntosDesgastePasivo, MinEstado, MaxEstado);
+            if (!isGameActive)
+            {
+                energia = Mathf.Clamp(energia - PuntosDesgastePasivo, MinEstado, MaxEstado);
+            }
         }
     }
 
@@ -131,7 +155,10 @@ public class RobotStateManager : MonoBehaviour
         while (true)
         {
             yield return espera;
-            felicidad = Mathf.Clamp(felicidad - PuntosDesgastePasivo, MinEstado, MaxEstado);
+            if (!isGameActive)
+            {
+                felicidad = Mathf.Clamp(felicidad - PuntosDesgastePasivo, MinEstado, MaxEstado);
+            }
         }
     }
 
@@ -164,31 +191,34 @@ public class RobotStateManager : MonoBehaviour
             return;
         }
 
-        // Costo real de actividad física del botón Jugar.
-        felicidad     += 30f;
-        energia       -= 15f;
-        mantenimiento -= 30f;
-
-        ClampEstados();
-
-        EnviarContextoChat(CrearContexto("[SISTEMA]: El usuario acaba de jugar contigo un rato. Estás muy feliz y te divertiste mucho. Comenta sobre el juego."));
+        // El juego acaba de iniciar. Ya no enviamos un prompt aquí porque la UI del chat se oculta, 
+        // lo que haría perder el mensaje. La respuesta se maneja al volver (Victoria o Cancelado).
     }
 
     /// <summary>
-    /// Punto de acceso exclusivo para el módulo de Realidad Aumentada.
-    /// Aplica las consecuencias matemáticas de que el usuario atrape al robot
-    /// durante el minijuego. Este método SOLO muta estadísticas; la inyección
-    /// de prompts al LLM es responsabilidad del script de AR que lo invoque.
+    /// Punto de acceso exclusivo para el módulo de Realidad Aumentada al finalizar el juego.
+    /// Aplica las consecuencias matemáticas de que el usuario gane el minijuego.
+    /// Este método SOLO muta estadísticas; la inyección de prompts al LLM 
+    /// es responsabilidad de los eventos del State Manager o AR si desean personalizarlo.
     /// 
-    /// Suscrito automáticamente a MinigameManager.OnRobotCaught.
+    /// Suscrito automáticamente a MinigameManager.OnGameWon.
     /// </summary>
-    public void AplicarResultadoCaptura()
+    public void AplicarResultadoVictoria()
     {
+        wasGameWon = true;
+
         felicidad     += 50f;
         energia       -= 15f;
         mantenimiento -= 30f;
 
         ClampEstados();
+
+        EnviarContextoChat(CrearContexto("[SISTEMA]: El usuario logró atraparte y ganó el minijuego. Te divertiste mucho corriendo pero ahora estás un poco cansado. Felicita al usuario por atraparte con tu tono sarcástico habitual."));
+    }
+
+    private void AplicarResultadoCancelado()
+    {
+        EnviarContextoChat(CrearContexto("[SISTEMA]: El usuario se rindió o salió del minijuego antes de atraparte. Haz un comentario breve preguntando por qué pararon de jugar."));
     }
 
     private void DispararTriggerAnimacion(string triggerName)
