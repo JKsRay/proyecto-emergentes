@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.XR.ARFoundation;
@@ -18,6 +19,11 @@ public class PlaceObjectOnPlane : MonoBehaviour
     [Min(0f)]
     [SerializeField]
     private float hoverHeight = 0.1f;
+
+    [Header("UI de Onboarding")]
+    [Tooltip("Texto de instrucciones para el usuario")]
+    [SerializeField]
+    private TextMeshProUGUI textoInstrucciones;
 
     private ARRaycastManager _raycastManager;
     private ARPlaneManager _planeManager;
@@ -68,8 +74,38 @@ public class PlaceObjectOnPlane : MonoBehaviour
             lineRenderer.enabled = false;
     }
 
+    private void UpdateOnboardingUI()
+    {
+        if (textoInstrucciones == null)
+            return;
+
+        // Estado de Juego: El robot ya fue instanciado exitosamente
+        if (_isPlacementLocked && _spawnedObject != null)
+        {
+            if (textoInstrucciones.gameObject.activeSelf)
+                textoInstrucciones.gameObject.SetActive(false);
+            return;
+        }
+
+        // Si aún no está instanciado, garantizamos que la UI sea visible
+        if (!textoInstrucciones.gameObject.activeSelf)
+            textoInstrucciones.gameObject.SetActive(true);
+
+        // Estado Listo vs Estado de Escaneo
+        if (_planeManager != null && _planeManager.trackables.count > 0)
+        {
+            textoInstrucciones.text = "¡Suelo detectado! Toca donde quieres que aparezca tu mascota.";
+        }
+        else
+        {
+            textoInstrucciones.text = "Escanea tu entorno moviendo la cámara lentamente...";
+        }
+    }
+
     private void Update()
     {
+        UpdateOnboardingUI();
+
         if (_raycastManager == null)
             return;
 

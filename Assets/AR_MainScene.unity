@@ -242,6 +242,18 @@ PrefabInstance:
       propertyPath: chatController
       value: 
       objectReference: {fileID: 940913986}
+    - target: {fileID: -81288034357649335, guid: 9ebebe2beb40c424aab9c5c61d39dde4, type: 3}
+      propertyPath: textoHUD_Energia
+      value: 
+      objectReference: {fileID: 828228950}
+    - target: {fileID: -81288034357649335, guid: 9ebebe2beb40c424aab9c5c61d39dde4, type: 3}
+      propertyPath: textoHUD_Felicidad
+      value: 
+      objectReference: {fileID: 828228948}
+    - target: {fileID: -81288034357649335, guid: 9ebebe2beb40c424aab9c5c61d39dde4, type: 3}
+      propertyPath: textoHUD_Mantenimiento
+      value: 
+      objectReference: {fileID: 828228949}
     - target: {fileID: 1272925286917316879, guid: 9ebebe2beb40c424aab9c5c61d39dde4, type: 3}
       propertyPath: m_text
       value: Hola!
@@ -322,6 +334,18 @@ PrefabInstance:
       propertyPath: chatController
       value: 
       objectReference: {fileID: 940913986}
+    - target: {fileID: 3342873792621019067, guid: 9ebebe2beb40c424aab9c5c61d39dde4, type: 3}
+      propertyPath: m_AnchorMax.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3342873792621019067, guid: 9ebebe2beb40c424aab9c5c61d39dde4, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3714596084155127179, guid: 9ebebe2beb40c424aab9c5c61d39dde4, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5536983656347407352, guid: 9ebebe2beb40c424aab9c5c61d39dde4, type: 3}
       propertyPath: m_GlobalPointSize
       value: 40
@@ -333,6 +357,10 @@ PrefabInstance:
     - target: {fileID: 6409129657006552263, guid: 9ebebe2beb40c424aab9c5c61d39dde4, type: 3}
       propertyPath: m_fontSizeBase
       value: 40
+      objectReference: {fileID: 0}
+    - target: {fileID: 6473005374686983174, guid: 9ebebe2beb40c424aab9c5c61d39dde4, type: 3}
+      propertyPath: m_AnchorMax.y
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 7610711269142331425, guid: 9ebebe2beb40c424aab9c5c61d39dde4, type: 3}
       propertyPath: m_Name
@@ -476,6 +504,50 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
   m_Name: 
   m_EditorClassIdentifier: UnityEngine.UI::UnityEngine.UI.Button
+--- !u!114 &828228947 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8728173811053194584, guid: 9ebebe2beb40c424aab9c5c61d39dde4, type: 3}
+  m_PrefabInstance: {fileID: 828228943}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
+--- !u!114 &828228948 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 5195456483259520458, guid: 9ebebe2beb40c424aab9c5c61d39dde4, type: 3}
+  m_PrefabInstance: {fileID: 828228943}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
+--- !u!114 &828228949 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1168647411451352556, guid: 9ebebe2beb40c424aab9c5c61d39dde4, type: 3}
+  m_PrefabInstance: {fileID: 828228943}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
+--- !u!114 &828228950 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4901095599870438891, guid: 9ebebe2beb40c424aab9c5c61d39dde4, type: 3}
+  m_PrefabInstance: {fileID: 828228943}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Unity.TextMeshPro::TMPro.TextMeshProUGUI
 --- !u!1 &897472580
 GameObject:
   m_ObjectHideFlags: 0
@@ -1192,6 +1264,7 @@ MonoBehaviour:
   objectPrefab: {fileID: 3816680439377690400, guid: 225c410353041e64fa20cd0de74081b0, type: 3}
   yRotationOffset: 0
   hoverHeight: 0.1
+  textoInstrucciones: {fileID: 828228947}
 --- !u!114 &2080854618
 MonoBehaviour:
   m_ObjectHideFlags: 0

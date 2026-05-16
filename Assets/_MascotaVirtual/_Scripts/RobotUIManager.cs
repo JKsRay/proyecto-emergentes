@@ -1,3 +1,4 @@
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -20,12 +21,27 @@ public class RobotUIManager : MonoBehaviour
     [SerializeField] private Button btnMantenimiento;
     [SerializeField] private Button btnJugar;
 
+    [Header("HUD de Estadísticas (Opcional)")]
+    [Tooltip("Renderiza la energía actual. Ej: '85%'")]
+    [SerializeField] private TextMeshProUGUI textoHUD_Energia;
+    
+    [Tooltip("Renderiza el mantenimiento actual. Ej: '85%'")]
+    [SerializeField] private TextMeshProUGUI textoHUD_Mantenimiento;
+    
+    [Tooltip("Renderiza la felicidad actual. Ej: '85%'")]
+    [SerializeField] private TextMeshProUGUI textoHUD_Felicidad;
+
     private void Start()
     {
         if (chatController == null)
         {
             chatController = FindAnyObjectByType<ChatController>();
         }
+
+        // Suscribirse al evento Update UI global de Unity para asegurar refresco rápido 
+        // sin depender del ciclo de Update por cada frame ni crear rutinas nuevas.
+        // Es más eficiente ya que solo renderizamos si el singleton existe.
+        Application.onBeforeRender += RefrescarHUD;
 
         // Conectar los botones a los métodos wrapper.
         // AddListener añade listeners de runtime que conviven con los
@@ -43,6 +59,8 @@ public class RobotUIManager : MonoBehaviour
 
     private void OnDestroy()
     {
+        Application.onBeforeRender -= RefrescarHUD;
+
         DesconectarBoton(btnRecargar, OnClickRecargar);
         DesconectarBoton(btnMantenimiento, OnClickMantenimiento);
         DesconectarBoton(btnJugar, OnClickJugar);
@@ -83,6 +101,31 @@ public class RobotUIManager : MonoBehaviour
     private void OnRequestInFlightChanged(bool inFlight)
     {
         SetBotonesInteractables(!inFlight);
+    }
+
+    private void RefrescarHUD()
+    {
+        // Solo actualizar si el Singleton del robot está activo en la escena
+        if (RobotStateManager.Instance == null) return;
+
+        // Obtener los valores exactos, redondearlos a enteros (truncando decimales) y añadir %
+        if (textoHUD_Energia != null)
+        {
+            int valEnergia = Mathf.RoundToInt(RobotStateManager.Instance.Energia);
+            textoHUD_Energia.text = $"{valEnergia}%";
+        }
+        
+        if (textoHUD_Mantenimiento != null)
+        {
+            int valMantenimiento = Mathf.RoundToInt(RobotStateManager.Instance.Mantenimiento);
+            textoHUD_Mantenimiento.text = $"{valMantenimiento}%";
+        }
+
+        if (textoHUD_Felicidad != null)
+        {
+            int valFelicidad = Mathf.RoundToInt(RobotStateManager.Instance.Felicidad);
+            textoHUD_Felicidad.text = $"{valFelicidad}%";
+        }
     }
 
     private void SetBotonesInteractables(bool interactable)
