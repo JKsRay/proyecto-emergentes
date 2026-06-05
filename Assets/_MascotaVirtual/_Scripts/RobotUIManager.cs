@@ -6,11 +6,6 @@ using UnityEngine.UI;
 /// Gestiona la interacción de los botones de la UI con el estado del robot.
 /// Utiliza RobotStateManager.Instance (Singleton) para comunicarse con el
 /// robot instanciado dinámicamente, sin requerir referencia por inspector.
-///
-/// IMPORTANTE: Los listeners se añaden con AddListener (runtime).
-/// Esto NO interfiere con los eventos persistentes configurados en el
-/// Inspector (ej. MinigameManager.StartGame/EndGame en el botón Jugar).
-/// Unity ejecuta ambos tipos de suscripción simultáneamente.
 /// </summary>
 public class RobotUIManager : MonoBehaviour
 {
@@ -21,15 +16,20 @@ public class RobotUIManager : MonoBehaviour
     [SerializeField] private Button btnMantenimiento;
     [SerializeField] private Button btnJugar;
 
-    [Header("HUD de Estadísticas (Opcional)")]
-    [Tooltip("Renderiza la energía actual. Ej: '85%'")]
+    [Header("HUD de Estadísticas (Textos)")]
     [SerializeField] private TextMeshProUGUI textoHUD_Energia;
-    
-    [Tooltip("Renderiza el mantenimiento actual. Ej: '85%'")]
     [SerializeField] private TextMeshProUGUI textoHUD_Mantenimiento;
-    
-    [Tooltip("Renderiza la felicidad actual. Ej: '85%'")]
     [SerializeField] private TextMeshProUGUI textoHUD_Felicidad;
+
+    [Header("HUD de Estadísticas (Barras Radiales)")]
+    [Tooltip("Renderiza el progreso circular de la batería (Valores de 0 a 1)")]
+    [SerializeField] private Image radialHUD_Energia;
+    
+    [Tooltip("Renderiza el progreso circular del mantenimiento (Valores de 0 a 1)")]
+    [SerializeField] private Image radialHUD_Mantenimiento;
+    
+    [Tooltip("Renderiza el progreso circular de la felicidad (Valores de 0 a 1)")]
+    [SerializeField] private Image radialHUD_Felicidad;
 
     private void Start()
     {
@@ -38,14 +38,8 @@ public class RobotUIManager : MonoBehaviour
             chatController = FindAnyObjectByType<ChatController>();
         }
 
-        // Suscribirse al evento Update UI global de Unity para asegurar refresco rápido 
-        // sin depender del ciclo de Update por cada frame ni crear rutinas nuevas.
-        // Es más eficiente ya que solo renderizamos si el singleton existe.
         Application.onBeforeRender += RefrescarHUD;
 
-        // Conectar los botones a los métodos wrapper.
-        // AddListener añade listeners de runtime que conviven con los
-        // listeners persistentes del Inspector (ej. MinigameManager).
         ConectarBoton(btnRecargar, OnClickRecargar);
         ConectarBoton(btnMantenimiento, OnClickMantenimiento);
         ConectarBoton(btnJugar, OnClickJugar);
@@ -74,10 +68,6 @@ public class RobotUIManager : MonoBehaviour
     }
 
     // ── Wrappers que acceden al Singleton ──────────────────────
-    // Verifican que el robot exista antes de ejecutar la acción.
-    // Si el robot aún no ha sido colocado en la escena, el botón
-    // simplemente no hará nada (falla silenciosa controlada).
-
     private void OnClickRecargar()
     {
         if (RobotStateManager.Instance != null)
@@ -97,7 +87,6 @@ public class RobotUIManager : MonoBehaviour
     }
 
     // ── Estado de botones ──────────────────────────────────────
-
     private void OnRequestInFlightChanged(bool inFlight)
     {
         SetBotonesInteractables(!inFlight);
@@ -105,10 +94,9 @@ public class RobotUIManager : MonoBehaviour
 
     private void RefrescarHUD()
     {
-        // Solo actualizar si el Singleton del robot está activo en la escena
         if (RobotStateManager.Instance == null) return;
 
-        // Obtener los valores exactos, redondearlos a enteros (truncando decimales) y añadir %
+        // Actualización de Textos
         if (textoHUD_Energia != null)
         {
             int valEnergia = Mathf.RoundToInt(RobotStateManager.Instance.Energia);
@@ -125,6 +113,22 @@ public class RobotUIManager : MonoBehaviour
         {
             int valFelicidad = Mathf.RoundToInt(RobotStateManager.Instance.Felicidad);
             textoHUD_Felicidad.text = $"{valFelicidad}%";
+        }
+
+        // Actualización de Imágenes Radiales
+        if (radialHUD_Energia != null)
+        {
+            radialHUD_Energia.fillAmount = RobotStateManager.Instance.Energia / 100f;
+        }
+
+        if (radialHUD_Mantenimiento != null)
+        {
+            radialHUD_Mantenimiento.fillAmount = RobotStateManager.Instance.Mantenimiento / 100f;
+        }
+
+        if (radialHUD_Felicidad != null)
+        {
+            radialHUD_Felicidad.fillAmount = RobotStateManager.Instance.Felicidad / 100f;
         }
     }
 
@@ -144,16 +148,9 @@ public class RobotUIManager : MonoBehaviour
     }
 
     // ── Helpers de conexión ────────────────────────────────────
-
     private void ConectarBoton(Button boton, UnityEngine.Events.UnityAction accion)
     {
-        if (boton == null)
-        {
-            return;
-        }
-
-        // RemoveListener solo elimina la instancia runtime exacta,
-        // NUNCA los listeners persistentes configurados en el Inspector.
+        if (boton == null) return;
         boton.onClick.RemoveListener(accion);
         boton.onClick.AddListener(accion);
     }
