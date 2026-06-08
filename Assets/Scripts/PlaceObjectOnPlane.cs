@@ -32,6 +32,34 @@ public class PlaceObjectOnPlane : MonoBehaviour
     private bool _warnedMissingPrefab;
     private bool _isPlacementLocked;
 
+    [Header("Configuración de Estabilidad AR")]
+    [Tooltip("Tiempo mínimo en segundos que el usuario debe escanear.")]
+    [SerializeField] private float minScanTime = 5.0f;
+    [Tooltip("Área mínima acumulada en metros cuadrados para considerar el suelo estable.")]
+    [SerializeField] private float minRequiredArea = 0.5f;
+
+    private float _scanTimer = 0f;
+
+    private bool IsScanStable()
+    {
+        if (_planeManager == null) return false;
+
+        float totalArea = 0f;
+        int horizontalPlanesCount = 0;
+
+        foreach (var plane in _planeManager.trackables)
+        {
+            if (plane.alignment == PlaneAlignment.HorizontalUp)
+            {
+                horizontalPlanesCount++;
+                totalArea += plane.size.x * plane.size.y;
+            }
+        }
+
+        return horizontalPlanesCount > 0 && totalArea >= minRequiredArea && _scanTimer >= minScanTime;
+    }
+
+
     public void UnlockPlacement()
     {
         _isPlacementLocked = false;
@@ -91,20 +119,42 @@ public class PlaceObjectOnPlane : MonoBehaviour
         if (!textoInstrucciones.gameObject.activeSelf)
             textoInstrucciones.gameObject.SetActive(true);
 
-        // Estado Listo vs Estado de Escaneo
-        if (_planeManager != null && _planeManager.trackables.count > 0)
+        if (IsScanStable())
         {
             textoInstrucciones.text = "¡Suelo detectado! Toca donde quieres que aparezca tu mascota.";
         }
         else
         {
-            textoInstrucciones.text = "Escanea tu entorno moviendo la cámara lentamente...";
+            // Calculamos progreso basado en tiempo y área detectada
+            float timeProgress = minScanTime > 0 ? (_scanTimer / minScanTime) : 1f;
+
+            float totalArea = 0f;
+            if (_planeManager != null)
+            {
+                foreach (var plane in _planeManager.trackables)
+                {
+                    if (plane.alignment == PlaneAlignment.HorizontalUp)
+                    {
+                        totalArea += plane.size.x * plane.size.y;
+                    }
+                }
+            }
+            float areaProgress = minRequiredArea > 0 ? (totalArea / minRequiredArea) : 1f;
+
+            // Progreso total es el menor de ambos factores
+            float progressPercent = Mathf.Clamp01(Mathf.Min(timeProgress, areaProgress)) * 100f;
+            textoInstrucciones.text = $"Escaneando entorno... {progressPercent:0}%";
         }
     }
 
     private void Update()
     {
         UpdateOnboardingUI();
+
+        if (!_isPlacementLocked)
+        {
+            _scanTimer += Time.deltaTime;
+        }
 
         if (_raycastManager == null)
             return;
@@ -131,6 +181,10 @@ public class PlaceObjectOnPlane : MonoBehaviour
             return;
 
         if (_isPlacementLocked)
+            return;
+
+        // Impedir la colocación del robot si el escaneo aún no se considera estable
+        if (!IsScanStable())
             return;
 
         if (!_raycastManager.Raycast(touch.position, _hits, TrackableType.PlaneWithinPolygon))

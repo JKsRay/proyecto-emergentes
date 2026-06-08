@@ -31,8 +31,8 @@ public class RobotStateManager : MonoBehaviour
     {
         get
         {
-            if (energia <= 20f) return RobotState.BateriaCritica;
-            if (mantenimiento <= 20f) return RobotState.Descalibrado;
+            if (energia <= 30f) return RobotState.BateriaCritica;
+            if (mantenimiento <= 30f) return RobotState.Descalibrado;
             if (felicidad <= 30f) return RobotState.Aburrido;
             if (felicidad >= 80f) return RobotState.Euforico;
             return RobotState.Normal;
@@ -185,6 +185,14 @@ public class RobotStateManager : MonoBehaviour
     public void BotonJugar()
     {
         RobotState estadoActual = CurrentState;
+
+        // Intentar reproducir la animación de rechazo o iniciar el juego mediante el controlador de animaciones
+        RobotAnimationController animController = GetComponent<RobotAnimationController>();
+        if (animController != null)
+        {
+            animController.TryPlay();
+        }
+
         if (estadoActual == RobotState.BateriaCritica || estadoActual == RobotState.Descalibrado)
         {
             EnviarContextoChat(CrearContexto("[SISTEMA]: El usuario intentó jugar contigo, pero estás demasiado cansado o necesitas mantenimiento. Comenta que te sientes mal y que necesitas recargar o mantenimiento antes de jugar."));
@@ -218,6 +226,13 @@ public class RobotStateManager : MonoBehaviour
 
     private void AplicarResultadoCancelado()
     {
+        // Forzar la expresión de sorpresa (índice 4) por 4 segundos
+        RobotAnimationController animController = GetComponent<RobotAnimationController>();
+        if (animController != null)
+        {
+            animController.TriggerTemporaryFace(4, 4.0f);
+        }
+
         EnviarContextoChat(CrearContexto("[SISTEMA]: El usuario se rindió o salió del minijuego antes de atraparte. Haz un comentario breve preguntando por qué pararon de jugar."));
     }
 

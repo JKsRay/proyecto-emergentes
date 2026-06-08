@@ -178,11 +178,28 @@ public class ChatController : MonoBehaviour
 
     private void SetRobotTalking(bool isTalking)
     {
+        // 1. Intentar actualizar el Animator (comportamiento original)
         Animator targetAnimator = ResolverAnimatorTalk();
-        if (targetAnimator == null)
-            return;
+        if (targetAnimator != null)
+        {
+            // Nota: Si "Talk" es un Trigger en el Animator Controller, SetBool no tendrá efecto,
+            // pero lo dejamos para compatibilidad con animators que sí usen Bool.
+            try
+            {
+                targetAnimator.SetBool("Talk", isTalking);
+            }
+            catch (System.Exception) {}
+        }
 
-        targetAnimator.SetBool("Talk", isTalking);
+        // 2. Notificar directamente al controlador de expresiones del robot activo en escena
+        if (RobotStateManager.Instance != null)
+        {
+            RobotAnimationController faceController = RobotStateManager.Instance.GetComponent<RobotAnimationController>();
+            if (faceController != null)
+            {
+                faceController.SetSpeaking(isTalking);
+            }
+        }
     }
 
     private Animator ResolverAnimatorTalk()

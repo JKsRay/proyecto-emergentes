@@ -39,9 +39,26 @@ public class MinigameManager : MonoBehaviour
         UpdateCatchCounterText();
         if (catchCount >= catchesToWin)
         {
-            OnGameWon?.Invoke();
-            EndGame();
+            StartCoroutine(VictorySequence());
         }
+    }
+
+    private IEnumerator VictorySequence()
+    {
+        // 1. Feedback visual instantáneo de victoria en la UI
+        if (Texto_ContadorCapturas != null)
+        {
+            Texto_ContadorCapturas.text = "¡Ganaste! 🎉";
+        }
+
+        // 2. Aplicar estadísticas e iniciar petición LLM en segundo plano
+        OnGameWon?.Invoke();
+
+        // 3. Esperar a que el robot termine su baile/salto de celebración (2.5 segundos)
+        yield return new WaitForSeconds(2.5f);
+
+        // 4. Volver al chat
+        EndGame();
     }
 
     private void UpdateCatchCounterText()

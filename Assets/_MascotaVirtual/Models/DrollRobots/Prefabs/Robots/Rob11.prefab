@@ -223,6 +223,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 10fc09ce5d97e5e438937a2f9e74eeda, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1970120855531028878}
+    - targetCorrespondingSourceObject: {fileID: 919132149155446097, guid: 10fc09ce5d97e5e438937a2f9e74eeda, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 745572802776085066}
     - targetCorrespondingSourceObject: {fileID: -1780761857780665197, guid: 10fc09ce5d97e5e438937a2f9e74eeda, type: 3}
       insertIndex: -1
       addedObject: {fileID: 4963972144276186528}
@@ -387,7 +390,33 @@ MonoBehaviour:
   triggerJugar: Play
   triggerMantenimiento: Maintain
   triggerRecargar: Recharge
-  factorDesgaste: 2
+--- !u!114 &745572802776085066
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3816680439377690400}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 82f129a2dbf51624cb79141e091357ec, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::RobotAnimationController
+  animator: {fileID: 0}
+  currentEnergy: 100
+  currentHappiness: 100
+  currentMaintenance: 100
+  idleBreakInterval: 15
+  triggerHello: Tr_Hello
+  triggerIdleBreak: Tr_IdleBreak
+  boolLookingFor: LookingFor
+  triggerLookingFor: Tr_LookingFor
+  triggerCriticalFall: Tr_CriticalFall
+  triggerRefuseNo: Tr_RefuseNo
+  triggerConfusedExit: Tr_ConfusedExit
+  OnPlaySuccess:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!4 &4592618355574810010 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 10fc09ce5d97e5e438937a2f9e74eeda, type: 3}
