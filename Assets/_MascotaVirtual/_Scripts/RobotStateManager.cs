@@ -169,7 +169,7 @@ public class RobotStateManager : MonoBehaviour
 
         DispararTriggerAnimacion(triggerRecargar);
 
-        EnviarContextoChat(CrearContexto("[SISTEMA]: El usuario acaba de enchufar tu cable y recargar tu batería. Sientes mucha energía. Dale las gracias brevemente."));
+        EnviarMensajePrehecho(MensajesRecargar);
     }
 
     public void BotonMantenimiento()
@@ -179,7 +179,7 @@ public class RobotStateManager : MonoBehaviour
 
         DispararTriggerAnimacion(triggerMantenimiento);
 
-        EnviarContextoChat(CrearContexto("[SISTEMA]: El usuario acaba de realizar mantenimiento en ti. Te sientes renovado y listo para funcionar al máximo. Comenta que te sientes mucho mejor después del mantenimiento."));
+        EnviarMensajePrehecho(MensajesMantenimiento);
     }
 
     public void BotonJugar()
@@ -193,9 +193,14 @@ public class RobotStateManager : MonoBehaviour
             animController.TryPlay();
         }
 
-        if (estadoActual == RobotState.BateriaCritica || estadoActual == RobotState.Descalibrado)
+        if (estadoActual == RobotState.BateriaCritica)
         {
-            EnviarContextoChat(CrearContexto("[SISTEMA]: El usuario intentó jugar contigo, pero estás demasiado cansado o necesitas mantenimiento. Comenta que te sientes mal y que necesitas recargar o mantenimiento antes de jugar."));
+            EnviarMensajePrehecho(MensajesRechazoBateria);
+            return;
+        }
+        else if (estadoActual == RobotState.Descalibrado)
+        {
+            EnviarMensajePrehecho(MensajesRechazoMantenimiento);
             return;
         }
 
@@ -221,7 +226,7 @@ public class RobotStateManager : MonoBehaviour
 
         ClampEstados();
 
-        EnviarContextoChat(CrearContexto("[SISTEMA]: El usuario logró atraparte y ganó el minijuego. Te divertiste mucho corriendo pero ahora estás un poco cansado. Felicita al usuario por atraparte con tu tono sarcástico habitual."));
+        EnviarMensajePrehecho(MensajesVictoria);
     }
 
     private void AplicarResultadoCancelado()
@@ -233,8 +238,9 @@ public class RobotStateManager : MonoBehaviour
             animController.TriggerTemporaryFace(4, 4.0f);
         }
 
-        EnviarContextoChat(CrearContexto("[SISTEMA]: El usuario se rindió o salió del minijuego antes de atraparte. Haz un comentario breve preguntando por qué pararon de jugar."));
+        EnviarMensajePrehecho(MensajesCancelado);
     }
+
 
     private void DispararTriggerAnimacion(string triggerName)
     {
@@ -293,6 +299,77 @@ public class RobotStateManager : MonoBehaviour
         }
 
         return false;
+    }
+
+    // ── Mensajes Pre-escritos con Modismos Chilenos ──────────
+    private static readonly string[] MensajesRecargar = new string[]
+    {
+        "¡Bacán! Quedé con la batería tapá en electrones. Se agradece el cablecito, andaba entero descargao.",
+        "¡Uf, al tiro reviví! Sentí el corrientazo directo en la placa madre. Vale por la carga, po.",
+        "Mish, por fin me alimentas. Ya estaba a punto de apagar la tele. ¡Quedé listo para el leceo!",
+        "Batería al cien por ciento, cachai. Quedé entero de prendido, ¡ahora no me frena nadie!",
+        "Oye, qué wena, ya sentía que me iba a negro. Vale por el enchufe, andaba con tuto cibernético."
+    };
+
+    private static readonly string[] MensajesMantenimiento = new string[]
+    {
+        "¡Ohh, qué wena! Me sacaste toda la grasa de los engranajes. ¡Toy filete!",
+        "Limpiecito y calibrado, cachai. Ya no me vibran las tuercas. Te sacaste un siete con la mantención.",
+        "¡Qué alivio, po! Mis sensores ya no andan tirando pantallazos azules. Quedé como nuevo, listo para la pega.",
+        "Ufff, hacía falta su aceitito en las articulaciones, ya andaba chillando como catre viejo. ¡Bacán!",
+        "¡Sistemas optimizados al tiro! Se siente pulento no tener polvo en los circuitos. Vale por la manito de gato."
+    };
+
+    private static readonly string[] MensajesRechazoBateria = new string[]
+    {
+        "Pucha, toy entero cansao, no me da el cuero para jugar. Enchúfame el cable primero, no seai fome.",
+        "Imposible, weón. Tengo la batería en la UTI. Si corro ahora, me voy a negro altiro.",
+        "No tengo ni una gota de energía, ando con un tuto terrible. Cárgame la pila o coopero.",
+        "Estoy más descargado que celular de abuela, po. Así no se puede jugar a nada, enchúfame altiro."
+    };
+
+    private static readonly string[] MensajesRechazoMantenimiento = new string[]
+    {
+        "¿Jugar? ¿Estai loco? Me crujen todos los pernos y tengo el disco duro al borde del colapso. Dame su mantención primero.",
+        "Ando entero descalibrado, cachai. Si me muevo mucho, se me va a soltar una tuerca. Pásale una llave inglesa a mis circuitos po.",
+        "No toy para trotar. Siento los motores más trabados que taco en hora punta. Necesito mantenimiento urgente.",
+        "Mis sensores andan dando puro jugo, weón. Haceme la mantención antes de que me pegue un pantallazo azul."
+    };
+
+    private static readonly string[] MensajesVictoria = new string[]
+    {
+        "¡Buena, cachai que me atrapaste! Pero ando entero sudado y con los cables cruzados del pique. Te sacaste un siete.",
+        "Mish, andas rápido para ser de carne y hueso. Me ganaste esta vez, pero quedé raja... ando terrible cansao.",
+        "¡Ganaste de puro sapo, po! Corrí tanto que ando a punto de fundir el motor. Felicidades, te pasaste.",
+        "Ya, si sé que me pillaste. No te agrandí tampoco. Ahora dame un respiro que mis servos andan ardiendo.",
+        "¡Qué wena! Me ganaste. Toy cansao pero fue terrible de bacán correr contigo."
+    };
+
+    private static readonly string[] MensajesCancelado = new string[]
+    {
+        "¡Chuta! ¿Qué pasó? ¿Te dio lata seguir jugando o te dio miedo perder contra un tarro de lata?",
+        "Oye, ¿por qué cortaste el mambo altiro? Ya le estaba agarrando el gusto a la carrera.",
+        "Mish, te aburriste al tiro. ¿Te cansaste de puro correr o te dio tuto?",
+        "Chócale, me dejaste pagando. Pensé que los humanos tenían más aguante. ¿Qué onda?",
+        "Me dejaste tirado en la mitad del juego, po. ¿Te dio miedo que te ganara un robot?"
+    };
+
+    private void EnviarMensajePrehecho(string[] listaMensajes)
+    {
+        if (chatController == null)
+        {
+            return;
+        }
+
+        if (listaMensajes == null || listaMensajes.Length == 0)
+        {
+            return;
+        }
+
+        int indice = Random.Range(0, listaMensajes.Length);
+        string mensaje = listaMensajes[indice];
+
+        chatController.DisplayPrewrittenMessage(mensaje);
     }
 
     private void EnviarContextoChat(string contexto)
