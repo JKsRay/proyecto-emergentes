@@ -221,8 +221,8 @@ public class RobotStateManager : MonoBehaviour
         wasGameWon = true;
 
         felicidad     += 50f;
-        energia       -= 15f;
-        mantenimiento -= 30f;
+        energia       -= 40f;
+        mantenimiento -= 40f;
 
         ClampEstados();
 

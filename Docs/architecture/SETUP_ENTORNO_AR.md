@@ -16,6 +16,6 @@ Por defecto, cuando clonas un proyecto de Unity en un PC nuevo, Unity abre el ed
 
 ## 3. La Primera Compilación (Paciencia)
 1. Conecta tu celular Android por USB (con la Depuración USB activada).
-2. Abre la escena `RayCast` (es la escena principal).
+2. Abre la escena `AR_MainScene` (es la escena principal).
 3. En la ventana de `Build Profiles`, dale a **`Build And Run`**.
 4. **Advertencia de tiempo:** La primera vez que compiles, el proceso de "IL2CPP" tardará entre 5 y 15 minutos en traducir todo el código C# a C++ para tu celular. No canceles el proceso. Las compilaciones futuras tardarán solo un par de minutos.

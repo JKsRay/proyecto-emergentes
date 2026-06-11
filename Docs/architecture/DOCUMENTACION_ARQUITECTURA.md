@@ -18,16 +18,16 @@ Se implementó una Máquina de Estados Finitos (FSM) encapsulada en la propiedad
 ```csharp
 public enum RobotState 
 { 
-    BateriaCritica, // Prioridad 1: Energía <= 20
-    SucioGrunon,    // Prioridad 2: Mantenimiento <= 20
+    BateriaCritica, // Prioridad 1: Energía <= 30
+    Descalibrado,   // Prioridad 2: Mantenimiento <= 30 (anteriormente: SucioGrunon)
     Aburrido,       // Prioridad 3: Felicidad <= 30
     Euforico,       // Prioridad 4: Felicidad >= 80
     Normal          // Default
 }
 ```
 
-### Inyección de Contexto (Llama 3.2 Local)
-El `RobotStateManager` actúa como un orquestador semántico. Al detectar una interacción o cambio de estado, traduce la evaluación discreta de la FSM en un **System Prompt** estructurado que inyecta contexto en el modelo local (Llama 3.2). El usuario interactúa de forma natural, pero en segundo plano (y de manera invisible) se anteponen directrices contextuales mediante el método `CrearContexto`:
+### Inyección de Contexto (Qwen3.5-0.8B Fine-Tuneado)
+El `RobotStateManager` actúa como un orquestador semántico. Al detectar una interacción o cambio de estado, traduce la evaluación discreta de la FSM en un **System Prompt** estructurado que inyecta contexto en el modelo local (Qwen3.5-0.8B via llama.cpp/LLMUnity). El usuario interactúa de forma natural, pero en segundo plano (y de manera invisible) se anteponen directrices contextuales mediante el método `CrearContexto`:
 
 ```text
 [SISTEMA: Batería crítica. Estás exhausto, niegas interactuar y exiges un cargador.]

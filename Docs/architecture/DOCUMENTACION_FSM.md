@@ -10,8 +10,8 @@ La FSM del robot gestiona tres estadísticas principales: Energía, Mantenimient
 
 | Prioridad | Estado | Umbral | Descripción del Prompt (Personalidad) |
 |---|---|---|---|
-| 1 | **`BateriaCritica`** | Energía <= 20 | Estás exhausto, niegas interactuar y exiges un cargador. |
-| 2 | **`Descalibrado`** | Mantenimiento <= 20 | Tus sistemas están descalibrados. Adoptas una personalidad mañosa y extremadamente sarcástica. Te quejas de vibraciones en servomotores y exiges mantenimiento. |
+| 1 | **`BateriaCritica`** | Energía <= 30 | Estás exhausto, niegas interactuar y exiges un cargador. |
+| 2 | **`Descalibrado`** | Mantenimiento <= 30 | Tus sistemas están descalibrados. Adoptas una personalidad mañosa y extremadamente sarcástica. Te quejas de vibraciones en servomotores y exiges mantenimiento. |
 | 3 | **`Aburrido`** | Felicidad <= 30 | Estás aburrido, das respuestas cortantes o irónicas pidiendo atención. |
 | 4 | **`Euforico`** | Felicidad >= 80 | Funcionamiento óptimo, de excelente humor dentro de tu sarcasmo habitual. |
 | Por Defecto | **`Normal`** | - | Estado óptimo. Respondes con tu sarcasmo robótico habitual. |
@@ -49,12 +49,16 @@ Las acciones del usuario sobre la mascota alteran directamente las estadísticas
 - **Mantenimiento:** -30
 
 #### Separación de Responsabilidades (Arquitectura Orientada a Eventos)
-Para evitar que el código espagueti arruine el proyecto, el módulo de Realidad Aumentada y la FSM están completamente desacoplados.
-El `MinigameManager` notifica que el robot fue capturado disparando un evento C# estático: `OnRobotCaught`.
-El `RobotStateManager` se suscribe a este evento en su `OnEnable` y se desuscribe preventivamente en su `OnDisable` (evitando memory leaks si el prefab es destruido). Cuando la FSM recibe la señal, ejecuta `AplicarResultadoCaptura()`.
+Para evitar el código espagueti, el módulo de Realidad Aumentada y la FSM están completamente desacoplados mediante eventos C# estáticos definidos en `MinigameManager`. El `RobotStateManager` se suscribe a tres de estos eventos en `OnEnable()` y se desuscribe en `OnDisable()` (evitando memory leaks si el prefab es destruido):
 
-* **El módulo AR:** Se encarga únicamente de la detección espacial, raycasting y emitir el evento de victoria.
-* **El módulo FSM:** Escucha el evento en silencio y se encarga de realizar la matemática (+50/-15/-30) y alterar el estado del robot.
+| Evento | Método en FSM | Efecto |
+|---|---|---|
+| `OnGameStarted` | `HandleGameStarted()` | Activa `isGameActive = true`, pausa el desgaste pasivo |
+| `OnGameWon` | `AplicarResultadoVictoria()` | Aplica +50 Felicidad, −15 Energía, −30 Mantenimiento e inyecta prompt de victoria al LLM |
+| `OnGameEnded` | `HandleGameEnded()` | Desactiva `isGameActive`; si no hubo victoria, ejecuta `AplicarResultadoCancelado()` |
+
+* **El módulo AR:** Se encarga de la detección espacial, raycasting (vía `TouchCatcher`), navegación del robot (vía `RobotARNavigator`) y emisión de los eventos `OnRobotCaught` y `OnGameWon`.
+* **El módulo FSM:** Escucha los eventos en silencio y se encarga de pausar/reanudar el desgaste, aplicar la matemática de recompensa (+50/−15/−30) y comunicar el resultado al LLM.
 
 ---
 > **📌 POLÍTICA DE DOCUMENTACIÓN VIVA**

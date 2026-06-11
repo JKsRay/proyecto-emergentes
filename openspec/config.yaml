@@ -1,0 +1,73 @@
+schema: spec-driven
+
+context: |
+  Unity 6 (6000.4.0f1) AR mobile game for Android (ARCore).
+  URP rendering, IL2CPP scripting backend, C#.
+  AR Foundation 6.4.2, XR Interaction Toolkit 3.4.1.
+  Local LLM via llama.cpp/LLMUnity (Qwen3.5-0.8B).
+  Architecture: Event-driven FSM, Singleton robot state manager.
+  Main scene: Assets/AR_MainScene.unity.
+  Docs in Spanish under Docs/.
+
+strict_tdd: false
+
+testing:
+  strict_tdd: false
+  test_runner:
+    command: ""
+    framework: "Unity Test Runner (Editor only for LLMUnity package)"
+  layers:
+    unit:
+      available: false
+      tool: "—"
+    integration:
+      available: false
+      tool: "—"
+    e2e:
+      available: false
+      tool: "—"
+  coverage:
+    available: false
+    command: "—"
+  quality:
+    linter:
+      available: false
+      command: "—"
+    type_checker:
+      available: false
+      command: "—"
+    formatter:
+      available: false
+      command: "—"
+
+rules:
+  proposal:
+    - Include rollback plan for risky changes
+    - Respect Unity-specific constraints (no manual .meta/.prefab/.unity edits)
+  specs:
+    - Use Given/When/Then for scenarios
+    - Use RFC 2119 keywords (MUST, SHALL, SHOULD, MAY)
+    - Update Docs/DOCUMENTACION_FSM.md when FSM thresholds or costs change
+  design:
+    - Include sequence diagrams for complex cross-module flows
+    - Document architecture decisions with rationale
+    - Maintain event-driven coupling; do NOT add direct references between AR and FSM modules
+  tasks:
+    - Group by phase, use hierarchical numbering
+    - Keep tasks completable in one session
+    - Consider IL2CPP build time (5–15 min first build)
+  apply:
+    - Follow existing code patterns (Singleton, static Action events)
+    - Never rename/move files outside Unity Editor
+    - Do not overwrite inspector-assigned UnityEvents
+    tdd: false
+    test_command: ""
+  verify:
+    - Manual verification via Unity Editor Play mode
+    - Test AR features on Android device; editor simulation is limited
+    test_command: ""
+    build_command: ""
+    coverage_threshold: 0
+  archive:
+    - Warn before merging destructive deltas
+    - Update main specs under openspec/specs/ after archiving

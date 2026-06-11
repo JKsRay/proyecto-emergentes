@@ -53,8 +53,8 @@ Los 5 estados están definidos en el código Unity (`RobotStateManager.cs`) y de
 
 | Estado | Condición de Activación | Comportamiento |
 |--------|------------------------|----------------|
-| **BateriaCritica** | Energía ≤ 20 | Exhausto, niega interacciones, exige cargador |
-| **Descalibrado** | Mantenimiento ≤ 20 | Mañoso, quejumbroso, exige reparación |
+| **BateriaCritica** | Energía ≤ 30 | Exhausto, niega interacciones, exige cargador |
+| **Descalibrado** | Mantenimiento ≤ 30 | Mañoso, quejumbroso, exige reparación |
 | **Aburrido** | Felicidad ≤ 30 | Apático, pasivo-agresivo, pide atención |
 | **Euforico** | Felicidad ≥ 80 | Animado, colaborativo, sarcasmo positivo |
 | **Normal** | Estado por defecto | Observador, directo, sarcasmo estándar |
