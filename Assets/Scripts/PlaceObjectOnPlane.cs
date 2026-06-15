@@ -39,24 +39,12 @@ public class PlaceObjectOnPlane : MonoBehaviour
     [SerializeField] private float minRequiredArea = 0.5f;
 
     private float _scanTimer = 0f;
+    private float _cachedTotalHorizontalArea = 0f;
+    private int _cachedHorizontalPlanesCount = 0;
 
     private bool IsScanStable()
     {
-        if (_planeManager == null) return false;
-
-        float totalArea = 0f;
-        int horizontalPlanesCount = 0;
-
-        foreach (var plane in _planeManager.trackables)
-        {
-            if (plane.alignment == PlaneAlignment.HorizontalUp)
-            {
-                horizontalPlanesCount++;
-                totalArea += plane.size.x * plane.size.y;
-            }
-        }
-
-        return horizontalPlanesCount > 0 && totalArea >= minRequiredArea && _scanTimer >= minScanTime;
+        return _cachedHorizontalPlanesCount > 0 && _cachedTotalHorizontalArea >= minRequiredArea && _scanTimer >= minScanTime;
     }
 
 
@@ -92,6 +80,25 @@ public class PlaceObjectOnPlane : MonoBehaviour
     {
         foreach (ARPlane plane in args.added)  HidePlaneVisuals(plane);
         foreach (ARPlane plane in args.updated) HidePlaneVisuals(plane);
+
+        RecalcularAreaPlanos();
+    }
+
+    private void RecalcularAreaPlanos()
+    {
+        _cachedTotalHorizontalArea = 0f;
+        _cachedHorizontalPlanesCount = 0;
+
+        if (_planeManager == null) return;
+
+        foreach (var plane in _planeManager.trackables)
+        {
+            if (plane.alignment == PlaneAlignment.HorizontalUp)
+            {
+                _cachedHorizontalPlanesCount++;
+                _cachedTotalHorizontalArea += plane.size.x * plane.size.y;
+            }
+        }
     }
 
     private void HidePlaneVisuals(ARPlane plane)
@@ -128,18 +135,7 @@ public class PlaceObjectOnPlane : MonoBehaviour
             // Calculamos progreso basado en tiempo y área detectada
             float timeProgress = minScanTime > 0 ? (_scanTimer / minScanTime) : 1f;
 
-            float totalArea = 0f;
-            if (_planeManager != null)
-            {
-                foreach (var plane in _planeManager.trackables)
-                {
-                    if (plane.alignment == PlaneAlignment.HorizontalUp)
-                    {
-                        totalArea += plane.size.x * plane.size.y;
-                    }
-                }
-            }
-            float areaProgress = minRequiredArea > 0 ? (totalArea / minRequiredArea) : 1f;
+            float areaProgress = minRequiredArea > 0 ? (_cachedTotalHorizontalArea / minRequiredArea) : 1f;
 
             // Progreso total es el menor de ambos factores
             float progressPercent = Mathf.Clamp01(Mathf.Min(timeProgress, areaProgress)) * 100f;

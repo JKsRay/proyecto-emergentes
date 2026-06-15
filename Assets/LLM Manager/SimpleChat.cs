@@ -46,6 +46,11 @@ public class ChatController : MonoBehaviour
             sendButton.onClick.RemoveListener(OnButtonClick);
             sendButton.onClick.AddListener(OnButtonClick);
         }
+
+        if (characterAgent != null)
+        {
+            _ = characterAgent.Warmup();
+        }
     }
 
     void OnDestroy()
@@ -69,55 +74,6 @@ public class ChatController : MonoBehaviour
     public void SendPrompt(string message)
     {
         SendTextToLLM(message, clearInputField: false);
-    }
-
-    public void DisplayPrewrittenMessage(string message)
-    {
-        StartCoroutine(SimulatePrewrittenResponse(message));
-    }
-
-    private System.Collections.IEnumerator SimulatePrewrittenResponse(string message)
-    {
-        SetRequestInFlight(true);
-
-        if (sendButton != null)
-        {
-            sendButton.interactable = false;
-        }
-
-        if (aiResponse != null)
-        {
-            aiResponse.text = "...";
-        }
-
-        // Simular efecto de escritura
-        SetRobotTalking(true);
-
-        string[] words = message.Split(' ');
-        string currentText = "";
-        float delayPerWord = 0.08f;
-
-        for (int i = 0; i < words.Length; i++)
-        {
-            currentText += (i == 0 ? "" : " ") + words[i];
-            if (aiResponse != null)
-            {
-                aiResponse.text = currentText;
-            }
-            yield return new WaitForSeconds(delayPerWord);
-        }
-
-        yield return new WaitForSeconds(1.0f);
-
-        SetRobotTalking(false);
-        SetRequestInFlight(false);
-
-        if (sendButton != null)
-        {
-            sendButton.interactable = true;
-        }
-
-        ProcesarSiguienteMensajeEnCola();
     }
 
     private void SetRequestInFlight(bool inFlight)

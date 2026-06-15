@@ -43,10 +43,10 @@ Las acciones del usuario sobre la mascota alteran directamente las estadísticas
 - **Energía:** -15
 - **Mantenimiento:** -30
 
-### Minijuego AR (`AplicarResultadoCaptura`)
+### Minijuego AR (`AplicarResultadoVictoria`)
 - **Felicidad:** +50
-- **Energía:** -15
-- **Mantenimiento:** -30
+- **Energía:** -40
+- **Mantenimiento:** -40
 
 #### Separación de Responsabilidades (Arquitectura Orientada a Eventos)
 Para evitar el código espagueti, el módulo de Realidad Aumentada y la FSM están completamente desacoplados mediante eventos C# estáticos definidos en `MinigameManager`. El `RobotStateManager` se suscribe a tres de estos eventos en `OnEnable()` y se desuscribe en `OnDisable()` (evitando memory leaks si el prefab es destruido):
@@ -54,11 +54,11 @@ Para evitar el código espagueti, el módulo de Realidad Aumentada y la FSM est�
 | Evento | Método en FSM | Efecto |
 |---|---|---|
 | `OnGameStarted` | `HandleGameStarted()` | Activa `isGameActive = true`, pausa el desgaste pasivo |
-| `OnGameWon` | `AplicarResultadoVictoria()` | Aplica +50 Felicidad, −15 Energía, −30 Mantenimiento e inyecta prompt de victoria al LLM |
+| `OnGameWon` | `AplicarResultadoVictoria()` | Aplica +50 Felicidad, −40 Energía, −40 Mantenimiento e inyecta prompt de victoria al LLM |
 | `OnGameEnded` | `HandleGameEnded()` | Desactiva `isGameActive`; si no hubo victoria, ejecuta `AplicarResultadoCancelado()` |
 
 * **El módulo AR:** Se encarga de la detección espacial, raycasting (vía `TouchCatcher`), navegación del robot (vía `RobotARNavigator`) y emisión de los eventos `OnRobotCaught` y `OnGameWon`.
-* **El módulo FSM:** Escucha los eventos en silencio y se encarga de pausar/reanudar el desgaste, aplicar la matemática de recompensa (+50/−15/−30) y comunicar el resultado al LLM.
+* **El módulo FSM:** Escucha los eventos en silencio y se encarga de pausar/reanudar el desgaste, aplicar la matemática de recompensa (+50/−40/−40) y comunicar el resultado al LLM.
 
 ---
 > **📌 POLÍTICA DE DOCUMENTACIÓN VIVA**

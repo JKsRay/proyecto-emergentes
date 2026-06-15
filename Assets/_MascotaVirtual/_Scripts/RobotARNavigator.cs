@@ -18,10 +18,13 @@ public class RobotARNavigator : MonoBehaviour
     // Memoria del movimiento previo para heurística de rebote ("anti-paredes")
     private Vector3 lastMoveDirection = Vector3.zero;
 
+    private ARPlaneManager planeManager;
+
     private void Awake()
     {
         animator = GetComponent<Animator>();
         mainCamera = Camera.main;
+        planeManager = Object.FindFirstObjectByType<ARPlaneManager>();
     }
 
     private void OnEnable()
@@ -159,10 +162,12 @@ public class RobotARNavigator : MonoBehaviour
     /// </summary>
     private Vector3 GetRandomPositionOnPlanes()
     {
-        // Buscar todos los planos AR en la jerarquía
-        ARPlane[] arPlanes = Object.FindObjectsByType<ARPlane>(FindObjectsSortMode.None);
+        if (planeManager == null)
+        {
+            planeManager = Object.FindFirstObjectByType<ARPlaneManager>();
+        }
 
-        if (arPlanes == null || arPlanes.Length == 0) 
+        if (planeManager == null) 
             return transform.position;
 
         Vector2 randomDir = Vector2.zero;
@@ -215,7 +220,7 @@ public class RobotARNavigator : MonoBehaviour
         float closestDistance = float.MaxValue;
 
         // Filtrar y buscar el plano de suelo más cercano al candidato
-        foreach (var plane in arPlanes)
+        foreach (var plane in planeManager.trackables)
         {
             if (plane.alignment != PlaneAlignment.HorizontalUp) 
                 continue;
